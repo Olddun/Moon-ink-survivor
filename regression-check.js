@@ -22,6 +22,7 @@ async function main() {
       startText: document.querySelector("#startButton").textContent,
       hasStats: [...document.querySelectorAll(".character-card")].every((card) => card.querySelectorAll(".character-stats b").length >= 3),
       hasTraits: [...document.querySelectorAll(".character-card")].every((card) => card.querySelector(".character-trait b")?.textContent.trim().length > 0),
+      pauseHidden: getComputedStyle(document.querySelector("#pauseButton")).display === "none",
     }));
     const characterStarts = await page.evaluate(() => {
       const debug = window.__moonSurvivorDebug;
@@ -376,6 +377,10 @@ async function main() {
         phase: 0,
         life: 0,
       });
+      if (game.chestState?.timer) {
+        window.clearTimeout(game.chestState.timer);
+        game.chestState.timer = null;
+      }
     });
     await page.waitForTimeout(180);
     const chestOpening = await page.evaluate(() => ({
@@ -2351,6 +2356,7 @@ async function main() {
     desktop.characterSelect.selected === "wanderer" &&
     desktop.characterSelect.hasStats &&
     desktop.characterSelect.hasTraits &&
+    desktop.characterSelect.pauseHidden &&
     desktop.characterSelect.startText.includes("月墨行者") &&
     desktop.characterStarts.length === 4 &&
     new Set(desktop.characterStarts.map((item) => item.weapons)).size === 4 &&

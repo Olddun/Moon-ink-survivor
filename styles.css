@@ -218,6 +218,10 @@ body[data-game-state="menu"] .build-panel {
   display: none;
 }
 
+body[data-game-state="menu"] .pause-button {
+  display: none;
+}
+
 .build-panel-title {
   display: flex;
   align-items: center;
