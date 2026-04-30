@@ -3566,6 +3566,7 @@
     if (id === "evolve-void-brush") {
       p.brushTimer = 0;
       triggerInkBurst(p.x, p.y, 76, 18 * p.damageMult);
+      game.blooms.push({ x: p.x, y: p.y, r: 18, max: 148, life: 1.45, color: palette.ink, kind: "evolve" });
       for (let i = 0; i < 7; i += 1) {
         makeProjectile(p.x, p.y, base + (i - 3) * 0.14);
       }
