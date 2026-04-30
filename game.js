@@ -190,6 +190,8 @@
   let shake = 0;
   let transitioning = false;
   let selectedCharacterId = "wanderer";
+  let pauseReturnState = "playing";
+  let codexReturnState = null;
 
   const game = {
     time: 0,
@@ -1833,12 +1835,35 @@
     });
   }
 
+  function canFreezeRun() {
+    return ["playing", "upgrade", "chest"].includes(state);
+  }
+
+  function pauseChestRevealTimer() {
+    const chestState = game.chestState;
+    if (!chestState || chestState.revealed || !chestState.timer) return;
+    window.clearTimeout(chestState.timer);
+    chestState.timer = null;
+    chestState.remaining = Math.max(220, (chestState.revealDueAt || performance.now() + 900) - performance.now());
+  }
+
+  function resumeChestRevealTimer() {
+    const chestState = game.chestState;
+    if (state !== "chest" || !chestState || chestState.revealed || chestState.timer) return;
+    const delay = chestState.remaining || 900;
+    chestState.revealDueAt = performance.now() + delay;
+    chestState.timer = window.setTimeout(() => revealChest(false), delay);
+    chestState.remaining = null;
+  }
+
   async function startRun() {
     if (transitioning) return;
     state = "transition";
     const changed = await playPageTransition(() => {
       resetGame();
       state = "playing";
+      pauseReturnState = "playing";
+      codexReturnState = null;
       ui.start.classList.remove("visible");
       ui.gameOver.classList.remove("visible");
       ui.upgrade.classList.remove("visible");
@@ -1852,7 +1877,9 @@
   }
 
   function pauseRun() {
-    if (state !== "playing" || transitioning) return false;
+    if (!canFreezeRun() || transitioning) return false;
+    pauseReturnState = state;
+    pauseChestRevealTimer();
     state = "paused";
     pointer.active = false;
     pointer.id = null;
@@ -1866,10 +1893,13 @@
   function resumeRun() {
     if (state !== "paused" || transitioning) return false;
     ui.pause.classList.remove("visible");
-    state = "playing";
+    state = pauseReturnState || "playing";
+    resumeChestRevealTimer();
     updateHud();
-    last = performance.now();
-    requestAnimationFrame(loop);
+    if (state === "playing") {
+      last = performance.now();
+      requestAnimationFrame(loop);
+    }
     return true;
   }
 
@@ -1883,6 +1913,8 @@
       ui.upgrade.classList.remove("visible");
       ui.chest.classList.remove("visible", "revealed");
       ui.codex.classList.remove("visible");
+      pauseReturnState = "playing";
+      codexReturnState = null;
       ui.start.classList.add("visible");
       game.chestState = null;
       renderCharacterSelect();
@@ -4302,6 +4334,8 @@
       revealed: false,
       clicks: 0,
       timer: null,
+      remaining: null,
+      revealDueAt: performance.now() + 2400,
     };
     ui.chestTitle.textContent = `${chest.rewardCount} 道月匣奖励`;
     ui.chestRewards.innerHTML = "";
@@ -4340,6 +4374,8 @@
     const chestState = game.chestState;
     if (!chestState || chestState.revealed) return;
     if (chestState.timer) window.clearTimeout(chestState.timer);
+    chestState.timer = null;
+    chestState.remaining = null;
     chestState.revealed = true;
     ui.chest.classList.add("revealed");
     ui.chestTitle.textContent = skipped ? "月匣已应声而开" : "月匣绽放";
@@ -4670,12 +4706,32 @@
   }
 
   function openCodex() {
+    if (!ui.codex.classList.contains("visible") && canFreezeRun()) {
+      codexReturnState = state;
+      pauseChestRevealTimer();
+      state = "codex";
+      pointer.active = false;
+      pointer.id = null;
+      ui.touchStick.querySelector("span").style.transform = "translate(0, 0)";
+    }
     renderCodex();
     ui.codex.classList.add("visible");
+    updateHud();
+    draw();
   }
 
   function closeCodex() {
     ui.codex.classList.remove("visible");
+    if (state === "codex") {
+      state = codexReturnState || "playing";
+      codexReturnState = null;
+      resumeChestRevealTimer();
+      updateHud();
+      if (state === "playing") {
+        last = performance.now();
+        requestAnimationFrame(loop);
+      }
+    }
   }
 
   function draw() {
@@ -6099,7 +6155,7 @@
   window.addEventListener("keydown", (event) => {
     keys.add(event.key.toLowerCase());
     if (event.key === " " && state === "menu") startRun();
-    if (event.key.toLowerCase() === "p" && state === "playing") {
+    if (event.key.toLowerCase() === "p" && canFreezeRun()) {
       event.preventDefault();
       pauseRun();
     } else if (event.key.toLowerCase() === "p" && state === "paused") {
@@ -6111,7 +6167,7 @@
       else openCodex();
     }
     if (event.key === "Escape" && ui.codex.classList.contains("visible")) closeCodex();
-    else if (event.key === "Escape" && state === "playing") pauseRun();
+    else if (event.key === "Escape" && canFreezeRun()) pauseRun();
     else if (event.key === "Escape" && state === "paused") resumeRun();
   });
 

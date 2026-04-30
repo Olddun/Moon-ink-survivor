@@ -92,6 +92,80 @@ async function main() {
       startHidden: !document.querySelector("#startOverlay").classList.contains("visible"),
       character: window.__moonSurvivorDebug.player.characterId,
     }));
+    await page.evaluate(() => window.__moonSurvivorDebug.showUpgrades());
+    await page.waitForTimeout(100);
+    await page.click("#pauseButton");
+    await page.waitForTimeout(100);
+    const pauseDuringUpgrade = await page.evaluate(() => ({
+      paused: document.querySelector("#pauseOverlay").classList.contains("visible"),
+      upgradeStillOpen: document.querySelector("#upgradeOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.click("#resumeButton");
+    await page.waitForTimeout(100);
+    const resumeToUpgrade = await page.evaluate(() => ({
+      pauseHidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      upgradeStillOpen: document.querySelector("#upgradeOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.locator(".choice").first().click();
+    await page.waitForTimeout(1050);
+    await page.click("#codexButton");
+    await page.waitForTimeout(100);
+    const codexPauseStart = await page.evaluate(() => ({
+      visible: document.querySelector("#codexOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      time: window.__moonSurvivorDebug.game.time,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.waitForTimeout(650);
+    const codexPauseHeld = await page.evaluate(() => ({
+      visible: document.querySelector("#codexOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      time: window.__moonSurvivorDebug.game.time,
+    }));
+    await page.click("#codexCloseButton");
+    await page.waitForTimeout(120);
+    const codexPauseClosed = await page.evaluate(() => ({
+      hidden: !document.querySelector("#codexOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      debug.openChest({ x: debug.player.x, y: debug.player.y, r: 18, tier: "common", rewardCount: 1, life: 0, phase: 0 });
+    });
+    await page.waitForTimeout(100);
+    await page.click("#pauseButton");
+    await page.waitForTimeout(100);
+    const pauseDuringChest = await page.evaluate(() => ({
+      paused: document.querySelector("#pauseOverlay").classList.contains("visible"),
+      chestStillOpen: document.querySelector("#chestOverlay").classList.contains("visible"),
+      chestRevealed: document.querySelector("#chestOverlay").classList.contains("revealed"),
+      timerStopped: !window.__moonSurvivorDebug.game.chestState?.timer,
+      state: window.__moonSurvivorDebug.state,
+    }));
+    await page.click("#resumeButton");
+    await page.waitForTimeout(100);
+    const resumeToChest = await page.evaluate(() => ({
+      pauseHidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      chestStillOpen: document.querySelector("#chestOverlay").classList.contains("visible"),
+      chestRevealed: document.querySelector("#chestOverlay").classList.contains("revealed"),
+      timerResumed: Boolean(window.__moonSurvivorDebug.game.chestState?.timer),
+      state: window.__moonSurvivorDebug.state,
+    }));
+    await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      debug.revealChest(true);
+      debug.closeChest();
+    });
+    await page.waitForTimeout(100);
+    await page.click("#pauseButton");
+    await page.waitForTimeout(80);
+    await page.click("#pauseRestartButton");
+    await page.waitForTimeout(1120);
     const buildPanelsInitial = await page.evaluate(() => ({
       weaponText: document.querySelector("#weaponBuildPanel").textContent,
       relicText: document.querySelector("#relicBuildPanel").textContent,
@@ -2233,7 +2307,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, upgraded, sawAbility, sawRelic, choiceStyle, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, upgraded, sawAbility, sawRelic, choiceStyle, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2305,6 +2379,29 @@ async function main() {
     desktop.pauseMenuRestarted.state === "playing" &&
     desktop.pauseMenuRestarted.startHidden &&
     desktop.pauseMenuRestarted.character === "lantern-child" &&
+    desktop.pauseDuringUpgrade.paused &&
+    desktop.pauseDuringUpgrade.upgradeStillOpen &&
+    desktop.pauseDuringUpgrade.state === "paused" &&
+    desktop.resumeToUpgrade.pauseHidden &&
+    desktop.resumeToUpgrade.upgradeStillOpen &&
+    desktop.resumeToUpgrade.state === "upgrade" &&
+    desktop.codexPauseStart.visible &&
+    desktop.codexPauseStart.state === "codex" &&
+    desktop.codexPauseHeld.visible &&
+    desktop.codexPauseHeld.state === "codex" &&
+    desktop.codexPauseHeld.time === desktop.codexPauseStart.time &&
+    desktop.codexPauseClosed.hidden &&
+    desktop.codexPauseClosed.state === "playing" &&
+    desktop.pauseDuringChest.paused &&
+    desktop.pauseDuringChest.chestStillOpen &&
+    !desktop.pauseDuringChest.chestRevealed &&
+    desktop.pauseDuringChest.timerStopped &&
+    desktop.pauseDuringChest.state === "paused" &&
+    desktop.resumeToChest.pauseHidden &&
+    desktop.resumeToChest.chestStillOpen &&
+    !desktop.resumeToChest.chestRevealed &&
+    desktop.resumeToChest.timerResumed &&
+    desktop.resumeToChest.state === "chest" &&
     desktop.buildPanelsInitial.character === "lantern-child" &&
     desktop.buildPanelsInitial.hp === 92 &&
     desktop.buildPanelsInitial.pickup >= 180 &&
@@ -2793,6 +2890,7 @@ async function main() {
     if (!condition) failed.push(name);
   };
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
+  note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
   note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
   note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("墨锋") && desktop.after.weaponPanel.includes("Lv") && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");

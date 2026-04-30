@@ -96,6 +96,8 @@ canvas {
 }
 
 .pause-button {
+  position: relative;
+  z-index: 16;
   min-width: 64px;
 }
 
@@ -494,6 +496,10 @@ body[data-game-state="menu"] .build-panel {
 .overlay.visible {
   display: grid;
   animation: overlayFadeIn 560ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pause-overlay {
+  z-index: 18;
 }
 
 .overlay.visible .title-lockup,
