@@ -26,7 +26,10 @@
           <div><span>击破</span><strong id="killText">0</strong></div>
           <div><span>构筑</span><strong id="buildText">0 / 0</strong></div>
         </div>
-        <button id="codexButton" class="codex-button" type="button" aria-label="打开武器展示">图鉴</button>
+        <div class="hud-actions">
+          <button id="pauseButton" class="hud-button pause-button" type="button" aria-label="暂停游戏">暂停</button>
+          <button id="codexButton" class="hud-button codex-button" type="button" aria-label="打开武器展示">图鉴</button>
+        </div>
       </section>
 
       <aside id="weaponBuildPanel" class="build-panel build-weapons" aria-label="已选择武器"></aside>
@@ -101,6 +104,19 @@
           </header>
           <div id="codexSummary" class="codex-summary"></div>
           <div id="codexGrid" class="codex-grid"></div>
+        </div>
+      </section>
+
+      <section id="pauseOverlay" class="overlay pause-overlay" aria-modal="true" aria-label="暂停菜单">
+        <div class="pause-panel">
+          <span class="eyebrow">Run Paused</span>
+          <h2>墨息暂凝</h2>
+          <p>当前战斗已停住。可以继续这一局，也可以重新开始或回到角色选择。</p>
+          <div class="pause-actions">
+            <button id="resumeButton" type="button">继续</button>
+            <button id="pauseRestartButton" type="button">重新开始</button>
+            <button id="mainMenuButton" type="button">回到主菜单</button>
+          </div>
         </div>
       </section>
 

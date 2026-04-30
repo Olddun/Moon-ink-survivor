@@ -49,6 +49,49 @@ async function main() {
     const startTransition = await page.locator("#pageTransition.visible.run").count();
     await page.waitForTimeout(1050);
     const started = !(await page.locator("#startOverlay.visible").count());
+    await page.click("#pauseButton");
+    await page.waitForTimeout(120);
+    const pauseOpened = await page.evaluate(() => ({
+      visible: document.querySelector("#pauseOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+      buttons: [...document.querySelectorAll(".pause-actions button")].map((button) => button.textContent.trim()).join("|"),
+    }));
+    await page.click("#resumeButton");
+    await page.waitForTimeout(160);
+    const pauseResumed = await page.evaluate(() => ({
+      hidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.click("#pauseButton");
+    await page.waitForTimeout(80);
+    await page.click("#pauseRestartButton");
+    await page.waitForTimeout(1120);
+    const pauseRestarted = await page.evaluate(() => ({
+      state: window.__moonSurvivorDebug.state,
+      pauseHidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      startHidden: !document.querySelector("#startOverlay").classList.contains("visible"),
+      time: document.querySelector("#timeText").textContent,
+      level: document.querySelector("#levelText").textContent,
+    }));
+    await page.click("#pauseButton");
+    await page.waitForTimeout(80);
+    await page.click("#mainMenuButton");
+    await page.waitForTimeout(1120);
+    const pauseMainMenu = await page.evaluate(() => ({
+      state: window.__moonSurvivorDebug.state,
+      startVisible: document.querySelector("#startOverlay").classList.contains("visible"),
+      pauseHidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      selected: document.querySelector(".character-card[data-selected='true']")?.dataset.characterId || "",
+    }));
+    await page.click("#startButton");
+    await page.waitForTimeout(1120);
+    const pauseMenuRestarted = await page.evaluate(() => ({
+      state: window.__moonSurvivorDebug.state,
+      startHidden: !document.querySelector("#startOverlay").classList.contains("visible"),
+      character: window.__moonSurvivorDebug.player.characterId,
+    }));
     const buildPanelsInitial = await page.evaluate(() => ({
       weaponText: document.querySelector("#weaponBuildPanel").textContent,
       relicText: document.querySelector("#relicBuildPanel").textContent,
@@ -2190,7 +2233,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, upgraded, sawAbility, sawRelic, choiceStyle, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, upgraded, sawAbility, sawRelic, choiceStyle, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2242,6 +2285,26 @@ async function main() {
     desktop.characterChosen.startText.includes("流萤拾露") &&
     desktop.startTransition > 0 &&
     desktop.started &&
+    desktop.pauseOpened.visible &&
+    desktop.pauseOpened.state === "paused" &&
+    desktop.pauseOpened.bodyState === "paused" &&
+    desktop.pauseOpened.buttons.includes("继续") &&
+    desktop.pauseOpened.buttons.includes("重新开始") &&
+    desktop.pauseOpened.buttons.includes("回到主菜单") &&
+    desktop.pauseResumed.hidden &&
+    desktop.pauseResumed.state === "playing" &&
+    desktop.pauseRestarted.state === "playing" &&
+    desktop.pauseRestarted.pauseHidden &&
+    desktop.pauseRestarted.startHidden &&
+    desktop.pauseRestarted.time === "00:00" &&
+    desktop.pauseRestarted.level === "1" &&
+    desktop.pauseMainMenu.state === "menu" &&
+    desktop.pauseMainMenu.startVisible &&
+    desktop.pauseMainMenu.pauseHidden &&
+    desktop.pauseMainMenu.selected === "lantern-child" &&
+    desktop.pauseMenuRestarted.state === "playing" &&
+    desktop.pauseMenuRestarted.startHidden &&
+    desktop.pauseMenuRestarted.character === "lantern-child" &&
     desktop.buildPanelsInitial.character === "lantern-child" &&
     desktop.buildPanelsInitial.hp === 92 &&
     desktop.buildPanelsInitial.pickup >= 180 &&

@@ -78,16 +78,25 @@ canvas {
   pointer-events: none;
 }
 
-.codex-button {
+.hud-actions {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.hud-button {
   min-width: 58px;
   padding: 10px 13px;
   border: 1px solid rgba(31, 38, 48, 0.12);
   background: rgba(255, 249, 237, 0.72);
   color: var(--ink);
   font-size: 13px;
-  pointer-events: auto;
   backdrop-filter: blur(14px);
   box-shadow: 0 14px 48px rgba(31, 38, 48, 0.08);
+}
+
+.pause-button {
+  min-width: 64px;
 }
 
 .brand,
@@ -488,7 +497,8 @@ body[data-game-state="menu"] .build-panel {
 }
 
 .overlay.visible .title-lockup,
-.overlay.visible .upgrade-panel {
+.overlay.visible .upgrade-panel,
+.overlay.visible .pause-panel {
   animation: panelBloomIn 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -500,6 +510,81 @@ body[data-game-state="menu"] .build-panel {
 .upgrade-panel {
   width: min(680px, 100%);
   text-align: center;
+}
+
+.pause-panel {
+  position: relative;
+  width: min(560px, 100%);
+  padding: 34px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 38, 48, 0.13);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 249, 237, 0.92), rgba(247, 241, 231, 0.82)),
+    radial-gradient(circle at 16% 14%, rgba(143, 123, 181, 0.16), transparent 36%),
+    radial-gradient(circle at 88% 86%, rgba(201, 154, 46, 0.18), transparent 38%);
+  box-shadow:
+    0 28px 80px rgba(31, 38, 48, 0.18),
+    inset 0 0 0 5px rgba(255, 249, 237, 0.42);
+  text-align: center;
+}
+
+.pause-panel::before,
+.pause-panel::after {
+  position: absolute;
+  inset: 16px;
+  content: "";
+  border: 1px solid rgba(31, 38, 48, 0.08);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.pause-panel::after {
+  inset: 26px;
+  border-color: rgba(201, 154, 46, 0.22);
+  transform: rotate(1.5deg);
+}
+
+.pause-panel h2 {
+  margin: 8px 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 6vw, 62px);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.pause-panel p {
+  width: min(420px, 100%);
+  margin: 0 auto 24px;
+  color: #4c4e52;
+  font-size: 15px;
+  font-weight: 720;
+  line-height: 1.75;
+}
+
+.pause-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pause-actions button {
+  min-height: 48px;
+  padding: 12px 14px;
+}
+
+.pause-actions button:first-child {
+  background: var(--teal);
+}
+
+.pause-actions button:nth-child(2) {
+  background: var(--ink);
+}
+
+.pause-actions button:last-child {
+  background: var(--gold);
+  color: var(--ink);
 }
 
 #startOverlay .title-lockup {
@@ -2609,6 +2694,7 @@ body[data-game-state="menu"] .build-panel {
   .overlay.visible,
   .overlay.visible .title-lockup,
   .overlay.visible .upgrade-panel,
+  .overlay.visible .pause-panel,
   .overlay.visible .eyebrow,
   .overlay.visible .choice,
   .page-transition.run,
@@ -2664,9 +2750,22 @@ body[data-game-state="menu"] .build-panel {
     grid-template-columns: repeat(2, minmax(62px, 1fr));
   }
 
-  .codex-button {
+  .hud-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .hud-button {
     padding: 8px 10px;
     font-size: 12px;
+  }
+
+  .pause-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .pause-panel {
+    padding: 26px 18px;
   }
 
   .stats div {

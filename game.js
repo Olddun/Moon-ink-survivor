@@ -7,6 +7,7 @@
     upgrade: document.getElementById("upgradeOverlay"),
     gameOver: document.getElementById("gameOverOverlay"),
     chest: document.getElementById("chestOverlay"),
+    pause: document.getElementById("pauseOverlay"),
     choices: document.getElementById("upgradeChoices"),
     chestRewards: document.getElementById("chestRewards"),
     chestTitle: document.getElementById("chestTitle"),
@@ -19,6 +20,10 @@
     codexSummary: document.getElementById("codexSummary"),
     characterSelect: document.getElementById("characterSelect"),
     startButton: document.getElementById("startButton"),
+    pauseButton: document.getElementById("pauseButton"),
+    resumeButton: document.getElementById("resumeButton"),
+    pauseRestartButton: document.getElementById("pauseRestartButton"),
+    mainMenuButton: document.getElementById("mainMenuButton"),
     restartButton: document.getElementById("restartButton"),
     timeText: document.getElementById("timeText"),
     levelText: document.getElementById("levelText"),
@@ -1838,11 +1843,53 @@
       ui.gameOver.classList.remove("visible");
       ui.upgrade.classList.remove("visible");
       ui.chest.classList.remove("visible", "revealed");
+      ui.pause.classList.remove("visible");
       draw();
     });
     if (!changed) return;
     last = performance.now();
     requestAnimationFrame(loop);
+  }
+
+  function pauseRun() {
+    if (state !== "playing" || transitioning) return false;
+    state = "paused";
+    pointer.active = false;
+    pointer.id = null;
+    ui.touchStick.querySelector("span").style.transform = "translate(0, 0)";
+    ui.pause.classList.add("visible");
+    updateHud();
+    draw();
+    return true;
+  }
+
+  function resumeRun() {
+    if (state !== "paused" || transitioning) return false;
+    ui.pause.classList.remove("visible");
+    state = "playing";
+    updateHud();
+    last = performance.now();
+    requestAnimationFrame(loop);
+    return true;
+  }
+
+  async function returnToMainMenu() {
+    if (!["paused", "gameover"].includes(state) || transitioning) return false;
+    state = "transition";
+    const changed = await playPageTransition(() => {
+      state = "menu";
+      ui.pause.classList.remove("visible");
+      ui.gameOver.classList.remove("visible");
+      ui.upgrade.classList.remove("visible");
+      ui.chest.classList.remove("visible", "revealed");
+      ui.codex.classList.remove("visible");
+      ui.start.classList.add("visible");
+      game.chestState = null;
+      renderCharacterSelect();
+      resetGame();
+      draw();
+    });
+    return changed;
   }
 
   function showGameOver() {
@@ -6052,11 +6099,20 @@
   window.addEventListener("keydown", (event) => {
     keys.add(event.key.toLowerCase());
     if (event.key === " " && state === "menu") startRun();
+    if (event.key.toLowerCase() === "p" && state === "playing") {
+      event.preventDefault();
+      pauseRun();
+    } else if (event.key.toLowerCase() === "p" && state === "paused") {
+      event.preventDefault();
+      resumeRun();
+    }
     if (event.key.toLowerCase() === "i") {
       if (ui.codex.classList.contains("visible")) closeCodex();
       else openCodex();
     }
     if (event.key === "Escape" && ui.codex.classList.contains("visible")) closeCodex();
+    else if (event.key === "Escape" && state === "playing") pauseRun();
+    else if (event.key === "Escape" && state === "paused") resumeRun();
   });
 
   window.addEventListener("keyup", (event) => {
@@ -6097,6 +6153,10 @@
 
   ui.startButton.addEventListener("click", startRun);
   ui.restartButton.addEventListener("click", startRun);
+  ui.pauseButton.addEventListener("click", pauseRun);
+  ui.resumeButton.addEventListener("click", resumeRun);
+  ui.pauseRestartButton.addEventListener("click", startRun);
+  ui.mainMenuButton.addEventListener("click", returnToMainMenu);
   ui.characterSelect.addEventListener("click", (event) => {
     const card = event.target.closest(".character-card");
     if (!card || state !== "menu") return;
@@ -6149,6 +6209,9 @@
     get selectedCharacter() {
       return selectedCharacter();
     },
+    get state() {
+      return state;
+    },
     selectCharacter(id) {
       if (!characters.some((character) => character.id === id) || state !== "menu") return false;
       selectedCharacterId = id;
@@ -6192,6 +6255,9 @@
     },
     openCodex,
     closeCodex,
+    pauseRun,
+    resumeRun,
+    returnToMainMenu,
     spawnChest,
     openChest,
     revealChest,
