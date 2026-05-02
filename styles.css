@@ -1000,6 +1000,20 @@ body[data-game-state="menu"] .pause-button {
   line-height: 1.1;
 }
 
+.route-count {
+  display: inline-block;
+  margin-top: 6px;
+  margin-right: 5px;
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--reward-b) 24%, transparent);
+  border-radius: 999px;
+  background: rgba(255, 249, 237, 0.78);
+  color: color-mix(in srgb, var(--reward-b) 62%, var(--ink));
+  font-size: 10px;
+  font-weight: 940;
+  line-height: 1.1;
+}
+
 .route-option small {
   display: block;
   margin-top: 6px;

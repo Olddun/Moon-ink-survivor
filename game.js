@@ -969,6 +969,19 @@
     ],
   };
 
+  const routeModKeys = {
+    brush: { swift: "brushSpeed", pierce: "brushForce" },
+    orb: { orbit: "orbOrbit", tempo: "orbTempo" },
+    flame: { reach: "flameReach", tempo: "flameTempo" },
+    frost: { long: "frostPierce", pulse: "frostPulse" },
+    lantern: { swarm: "lanternSwarm", radiance: "lanternRadiance" },
+    sigil: { line: "sigilLine", veil: "sigilVeil" },
+    jade: { fork: "jadeFork", seal: "jadeSeal" },
+    needle: { shower: "needleShower", seal: "needleSeal" },
+    fan: { wide: "fanWide", return: "fanReturn" },
+    umbrella: { guard: "umbrellaGuard", spine: "umbrellaSpine" },
+  };
+
   const codexSections = [
     {
       title: "角色特性",
@@ -3962,7 +3975,12 @@
 
   function renderRouteChoices(upgrade, routes) {
     if (!routes.length) return "";
-    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两个都能点；喜欢另一边就直接选另一边，本次升级马上生效。</p></div>`;
+    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">已选 ${getRoutePickCount(route)} 次</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两个都能点；喜欢另一边就直接选另一边，本次升级马上生效。</p></div>`;
+  }
+
+  function getRoutePickCount(route) {
+    const modKey = routeModKeys[route.baseId || route.id]?.[route.variantId];
+    return modKey ? game.player.mods[modKey] || 0 : 0;
   }
 
   function plainRouteEffect(effect = "") {
@@ -6394,7 +6412,15 @@
     resumeRun,
     returnToMainMenu,
     spawnChest,
-    openChest,
+    openChest(chest) {
+      if (state !== "playing") {
+        ui.upgrade.classList.remove("visible");
+        ui.pause.classList.remove("visible");
+        state = "playing";
+        updateHud();
+      }
+      openChest(chest);
+    },
     revealChest,
     closeChest,
     applyUpgradeById(id) {

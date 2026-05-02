@@ -373,6 +373,8 @@ async function main() {
       await page.locator(".choice").first().click();
       await page.waitForTimeout(1050);
     }
+    await page.waitForFunction(() => window.__moonSurvivorDebug.state === "playing" && !document.querySelector("#upgradeOverlay").classList.contains("visible"), null, { timeout: 5000 })
+      .catch(() => errors.push("run did not return to playing before chest regression"));
     const superWeapon = await page.evaluate((before) => {
       const debug = window.__moonSurvivorDebug;
       const { player, game } = debug;
@@ -2682,6 +2684,7 @@ async function main() {
     desktop.needleOption.effect.includes("2 条路线") &&
     desktop.needleOption.routeText.includes("路线一") &&
     desktop.needleOption.routeText.includes("路线二") &&
+    desktop.needleOption.routeText.includes("已选") &&
     desktop.needleOption.routeTags.includes("打法：多目标落针") &&
     desktop.needleOption.routeTags.includes("打法：减速增伤") &&
     desktop.needleOption.text.includes("两个都能点") &&
@@ -2700,6 +2703,7 @@ async function main() {
     desktop.fanOption.routes === 2 &&
     desktop.fanOption.routeText.includes("扫得更宽") &&
     desktop.fanOption.routeText.includes("回风返场") &&
+    desktop.fanOption.routeText.includes("已选") &&
     desktop.fanEffect.level >= 1 &&
     desktop.fanEffect.returnRoute >= 1 &&
     desktop.fanEffect.triggered &&
@@ -2766,6 +2770,7 @@ async function main() {
     desktop.umbrellaOption.routes === 2 &&
     desktop.umbrellaOption.routeText.includes("伞面更稳") &&
     desktop.umbrellaOption.routeText.includes("伞骨反刺") &&
+    desktop.umbrellaOption.routeText.includes("已选") &&
     desktop.umbrellaOption.effect.includes("2 条路线") &&
     desktop.umbrellaEffect.level >= 1 &&
     desktop.umbrellaEffect.spineRoute >= 1 &&
