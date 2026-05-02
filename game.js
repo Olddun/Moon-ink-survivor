@@ -4529,18 +4529,24 @@
     panel.innerHTML = `<div class="build-panel-title"><span>${title}</span><strong>${items.length}</strong><button class="build-panel-toggle" type="button" aria-label="${expanded ? "收起" : "展开"}${title}面板" aria-expanded="${expanded}">${expanded ? "−" : "+"}</button></div><div class="build-panel-thumbs" aria-label="${title}缩略图">${thumbHtml}</div><div class="build-panel-items">${itemHtml}</div>`;
   }
 
+  function weaponRouteValue(levelText, routes) {
+    const activeRoutes = routes.filter((route) => route.value > 0);
+    if (!activeRoutes.length) return levelText;
+    return `${levelText} · 路线 ${routes.map((route) => `${route.name} ${route.value}`).join(" / ")}`;
+  }
+
   function collectWeapons(p) {
     const items = [];
-    if (p.brushCount) items.push({ id: "brush", type: "武器", name: "墨锋", value: `Lv ${p.brushCount}/${upgradeCaps.brush}`, desc: "自动飞出的墨锋" });
-    if (p.orbs) items.push({ id: "orb", type: "武器", name: "星铃", value: `Lv ${p.orbs}/${upgradeCaps.orb}`, desc: "环绕切割的星铃" });
-    if (p.flameLevel) items.push({ id: "flame", type: "武器", name: "月焰", value: `Lv ${p.flameLevel}/${upgradeCaps.flame}`, desc: "周期扩散的月焰" });
-    if (p.frostLevel) items.push({ id: "frost", type: "武器", name: "霜弦", value: `Lv ${p.frostLevel}/${upgradeCaps.frost}`, desc: "穿刺并减速的霜弦" });
-    if (p.lanternLevel) items.push({ id: "lantern", type: "武器", name: "流萤灯", value: `Lv ${p.lanternLevel}/${upgradeCaps.lantern}`, desc: "追光流萤自动追击" });
-    if (p.sigilLevel) items.push({ id: "sigil", type: "武器", name: "照影符", value: `Lv ${p.sigilLevel}/${upgradeCaps.sigil}`, desc: "低频直线影符，高收益贯穿" });
-    if (p.jadeLevel) items.push({ id: "jade", type: "武器", name: "玉简雷", value: `Lv ${p.jadeLevel}/${upgradeCaps.jade}`, desc: "玉简雷刻锁定点杀" });
-    if (p.needleLevel) items.push({ id: "needle", type: "武器", name: "雨墨针", value: `Lv ${p.needleLevel}/${upgradeCaps.needle}`, desc: "天幕垂落细针雨" });
-    if (p.fanLevel) items.push({ id: "fan", type: "武器", name: "玉扇风", value: `Lv ${p.fanLevel}/${upgradeCaps.fan}`, desc: "低频扇面弧风，扫出安全区" });
-    if (p.umbrellaLevel) items.push({ id: "umbrella", type: "武器", name: "墨莲伞", value: `Lv ${p.umbrellaLevel}/${upgradeCaps.umbrella}`, desc: "近身护圈，伞骨反打外圈敌人" });
+    if (p.brushCount) items.push({ id: "brush", type: "武器", name: "墨锋", value: weaponRouteValue(`Lv ${p.brushCount}/${upgradeCaps.brush}`, [{ name: "更快出手", value: p.mods.brushSpeed }, { name: "更痛爆开", value: p.mods.brushForce }]), desc: "自动飞出的墨锋" });
+    if (p.orbs) items.push({ id: "orb", type: "武器", name: "星铃", value: weaponRouteValue(`Lv ${p.orbs}/${upgradeCaps.orb}`, [{ name: "转得更大", value: p.mods.orbOrbit }, { name: "转得更快", value: p.mods.orbTempo }]), desc: "环绕切割的星铃" });
+    if (p.flameLevel) items.push({ id: "flame", type: "武器", name: "月焰", value: weaponRouteValue(`Lv ${p.flameLevel}/${upgradeCaps.flame}`, [{ name: "烧得更远", value: p.mods.flameReach }, { name: "烧得更勤", value: p.mods.flameTempo }]), desc: "周期扩散的月焰" });
+    if (p.frostLevel) items.push({ id: "frost", type: "武器", name: "霜弦", value: weaponRouteValue(`Lv ${p.frostLevel}/${upgradeCaps.frost}`, [{ name: "穿更多人", value: p.mods.frostPierce }, { name: "冻得更久", value: p.mods.frostPulse }]), desc: "穿刺并减速的霜弦" });
+    if (p.lanternLevel) items.push({ id: "lantern", type: "武器", name: "流萤灯", value: weaponRouteValue(`Lv ${p.lanternLevel}/${upgradeCaps.lantern}`, [{ name: "飞得更勤", value: p.mods.lanternSwarm }, { name: "每下更亮", value: p.mods.lanternRadiance }]), desc: "追光流萤自动追击" });
+    if (p.sigilLevel) items.push({ id: "sigil", type: "武器", name: "照影符", value: weaponRouteValue(`Lv ${p.sigilLevel}/${upgradeCaps.sigil}`, [{ name: "直线更长", value: p.mods.sigilLine }, { name: "暗场更稳", value: p.mods.sigilVeil }]), desc: "低频直线影符，高收益贯穿" });
+    if (p.jadeLevel) items.push({ id: "jade", type: "武器", name: "玉简雷", value: weaponRouteValue(`Lv ${p.jadeLevel}/${upgradeCaps.jade}`, [{ name: "分雷点杀", value: p.mods.jadeFork }, { name: "镇住一片", value: p.mods.jadeSeal }]), desc: "玉简雷刻锁定点杀" });
+    if (p.needleLevel) items.push({ id: "needle", type: "武器", name: "雨墨针", value: weaponRouteValue(`Lv ${p.needleLevel}/${upgradeCaps.needle}`, [{ name: "下得更密", value: p.mods.needleShower }, { name: "钉住目标", value: p.mods.needleSeal }]), desc: "天幕垂落细针雨" });
+    if (p.fanLevel) items.push({ id: "fan", type: "武器", name: "玉扇风", value: weaponRouteValue(`Lv ${p.fanLevel}/${upgradeCaps.fan}`, [{ name: "扇面更宽", value: p.mods.fanWide }, { name: "回风追打", value: p.mods.fanReturn }]), desc: "低频扇面弧风，扫出安全区" });
+    if (p.umbrellaLevel) items.push({ id: "umbrella", type: "武器", name: "墨莲伞", value: weaponRouteValue(`Lv ${p.umbrellaLevel}/${upgradeCaps.umbrella}`, [{ name: "护圈更稳", value: p.mods.umbrellaGuard }, { name: "伞骨反刺", value: p.mods.umbrellaSpine }]), desc: "近身护圈，伞骨反打外圈敌人" });
     if (p.branches.brushSplinter) items.push({ id: "branch-brush-splinter", type: "武器", name: "墨锋散毫", value: `Lv ${p.branches.brushSplinter}/${upgradeCaps["branch-brush-splinter"]}`, desc: "墨锋命中裂出细毫" });
     if (p.branches.brushRain) items.push({ id: "branch-brush-rain", type: "武器", name: "墨锋骤雨", value: `Lv ${p.branches.brushRain}/${upgradeCaps["branch-brush-rain"]}`, desc: "墨锋齐射落下碑拓墨雨" });
     if (p.branches.orbRecall) items.push({ id: "branch-orb-recall", type: "武器", name: "星铃归潮", value: `Lv ${p.branches.orbRecall}/${upgradeCaps["branch-orb-recall"]}`, desc: "拾取月露触发召回星纹" });

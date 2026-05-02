@@ -169,6 +169,7 @@ async function main() {
     await page.waitForTimeout(1120);
     const buildPanelsInitial = await page.evaluate(() => ({
       weaponText: document.querySelector("#weaponBuildPanel").textContent,
+      weaponRouteReadable: document.querySelector("#weaponBuildPanel").textContent.includes("路线") && document.querySelector("#weaponBuildPanel").textContent.includes("飞得更勤") && document.querySelector("#weaponBuildPanel").textContent.includes("每下更亮"),
       relicText: document.querySelector("#relicBuildPanel").textContent,
       traitText: document.querySelector("#traitBuildPanel").textContent,
       expanded: [...document.querySelectorAll(".build-panel")].map((panel) => panel.dataset.expanded),
@@ -2452,6 +2453,7 @@ async function main() {
     desktop.buildPanelsExpanded.detailVisible &&
     desktop.buildPanelsInitial.icons >= 3 &&
     desktop.buildPanelsInitial.weaponText.includes("流萤灯") &&
+    desktop.buildPanelsInitial.weaponRouteReadable &&
     desktop.buildPanelsInitial.traitText.includes("流萤拾露") &&
     desktop.buildPanelsInitial.traitText.includes("萤露回灯") &&
     desktop.characterTraitFx.exposed &&
