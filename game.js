@@ -3975,7 +3975,12 @@
 
   function renderRouteChoices(upgrade, routes) {
     if (!routes.length) return "";
-    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">已选 ${getRoutePickCount(route)} 次</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两个都能点；喜欢另一边就直接选另一边，本次升级马上生效。</p></div>`;
+    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两个都能点；喜欢另一边就直接选另一边，本次升级马上生效。</p></div>`;
+  }
+
+  function routePickLabel(route) {
+    const count = getRoutePickCount(route);
+    return `已选 ${count} 次 · 选后 ${count + 1}`;
   }
 
   function getRoutePickCount(route) {

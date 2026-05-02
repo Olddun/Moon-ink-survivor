@@ -2685,6 +2685,7 @@ async function main() {
     desktop.needleOption.routeText.includes("路线一") &&
     desktop.needleOption.routeText.includes("路线二") &&
     desktop.needleOption.routeText.includes("已选") &&
+    desktop.needleOption.routeText.includes("选后") &&
     desktop.needleOption.routeTags.includes("打法：多目标落针") &&
     desktop.needleOption.routeTags.includes("打法：减速增伤") &&
     desktop.needleOption.text.includes("两个都能点") &&
@@ -2704,6 +2705,7 @@ async function main() {
     desktop.fanOption.routeText.includes("扫得更宽") &&
     desktop.fanOption.routeText.includes("回风返场") &&
     desktop.fanOption.routeText.includes("已选") &&
+    desktop.fanOption.routeText.includes("选后") &&
     desktop.fanEffect.level >= 1 &&
     desktop.fanEffect.returnRoute >= 1 &&
     desktop.fanEffect.triggered &&
@@ -2771,6 +2773,7 @@ async function main() {
     desktop.umbrellaOption.routeText.includes("伞面更稳") &&
     desktop.umbrellaOption.routeText.includes("伞骨反刺") &&
     desktop.umbrellaOption.routeText.includes("已选") &&
+    desktop.umbrellaOption.routeText.includes("选后") &&
     desktop.umbrellaOption.effect.includes("2 条路线") &&
     desktop.umbrellaEffect.level >= 1 &&
     desktop.umbrellaEffect.spineRoute >= 1 &&
