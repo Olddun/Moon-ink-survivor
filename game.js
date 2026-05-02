@@ -3034,6 +3034,53 @@
     return true;
   }
 
+  function triggerRouteFeedback(baseId = "", variantId = "") {
+    const p = game.player;
+    if (!p) return false;
+    const routeCount = Math.max(1, Object.values(p.mods).reduce((sum, value) => sum + (Number(value) || 0), 0));
+    const color =
+      baseId === "brush" ? palette.ink :
+        baseId === "orb" ? palette.gold :
+          baseId === "flame" ? palette.coral :
+            baseId === "frost" ? palette.lilac :
+              baseId === "lantern" ? palette.moss :
+                baseId === "sigil" ? palette.lilac :
+                  baseId === "jade" ? palette.moss :
+                    baseId === "needle" ? palette.teal :
+                      baseId === "fan" ? palette.gold :
+                        baseId === "umbrella" ? palette.teal :
+                          palette.gold;
+    const radius = 42 + Math.min(44, routeCount * 5) + (["flame", "needle", "fan", "umbrella"].includes(baseId) ? 12 : 0);
+    const beamCount = baseId === "needle" ? 5 : baseId === "umbrella" ? 8 : baseId === "fan" ? 6 : baseId === "orb" ? 7 : 4;
+    const damage = (5 + routeCount * 0.9 + (["needle", "fan", "umbrella", "flame"].includes(baseId) ? 3 : 0)) * p.damageMult;
+    game.blooms.push({ x: p.x, y: p.y, r: 7, max: radius, life: 0.36, color, kind: "routeChoice", routeBase: baseId, routeVariant: variantId });
+    addTrail(p.x, p.y, color, 16 + Math.min(24, routeCount * 2), 0.28, baseId === "umbrella" ? "umbrella" : baseId === "needle" ? "needle" : "diamond");
+    for (let i = 0; i < beamCount; i += 1) {
+      const angle = (i / beamCount) * Math.PI * 2 + (variantId.length % 5) * 0.16;
+      const reach = radius * (0.55 + (i % 2) * 0.28);
+      game.beams.push({
+        x1: p.x + Math.cos(angle) * 12,
+        y1: p.y + Math.sin(angle) * 12,
+        x2: p.x + Math.cos(angle) * reach,
+        y2: p.y + Math.sin(angle) * reach,
+        life: 0.2,
+        maxLife: 0.2,
+        width: baseId === "umbrella" ? 5 : 3,
+        color,
+      });
+    }
+    for (const enemy of game.enemies) {
+      if (dist(p, enemy) < radius + enemy.r) {
+        dealDamage(enemy, damage, 7, p, "route");
+        enemy.slow = Math.max(enemy.slow || 0, 0.3);
+      }
+    }
+    addDewCharge(0.18 + Math.min(0.7, routeCount * 0.04));
+    spawnParticles(p.x, p.y, color, 10 + Math.min(10, routeCount));
+    shake = Math.max(shake, 1.8 + Math.min(1.6, routeCount * 0.06));
+    return true;
+  }
+
   function triggerTempoBell(source = "", x = game.player.x, y = game.player.y, power = 1) {
     const p = game.player;
     if (!p?.relics.tempoBell) return false;
@@ -3539,6 +3586,7 @@
     if (upgrade.variantApply) upgrade.variantApply(game.player);
     if (upgrade.variantId) {
       game.lastVariant = `${upgrade.baseName || upgrade.name}：${upgrade.variantName}`;
+      triggerRouteFeedback(upgrade.baseId || upgrade.id, upgrade.variantId);
       triggerRouteCharm(upgrade.baseId || upgrade.id);
     }
     const pickId = upgrade.baseId || upgrade.id;
@@ -5600,6 +5648,30 @@
       ctx.strokeRect(-r * 0.22, -r * 0.22, r * 0.44, r * 0.44);
       ctx.restore();
     }
+    if (bloom.kind === "routeChoice") {
+      ctx.save();
+      ctx.translate(bloom.x, bloom.y);
+      ctx.rotate(game.time * 0.9 + String(bloom.routeVariant || "").length * 0.12);
+      ctx.strokeStyle = bloom.color;
+      ctx.globalAlpha *= 0.8;
+      const spokes = bloom.routeBase === "umbrella" ? 8 : bloom.routeBase === "fan" ? 6 : bloom.routeBase === "needle" ? 10 : 5;
+      for (let i = 0; i < spokes; i += 1) {
+        ctx.rotate((Math.PI * 2) / spokes);
+        ctx.beginPath();
+        ctx.moveTo(r * 0.18, 0);
+        ctx.lineTo(r * 0.74, 0);
+        ctx.stroke();
+      }
+      ctx.globalAlpha *= 0.72;
+      if (bloom.routeBase === "fan" || bloom.routeBase === "umbrella") {
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.54, -Math.PI * 0.15, Math.PI * 1.15);
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(-r * 0.3, -r * 0.3, r * 0.6, r * 0.6);
+      }
+      ctx.restore();
+    }
     if (bloom.kind === "fanFeather" || bloom.kind === "jadeFanFeather") {
       ctx.save();
       ctx.translate(bloom.x, bloom.y);
@@ -6332,6 +6404,7 @@
     triggerChestPrism,
     triggerBranchInkstone,
     triggerRouteCharm,
+    triggerRouteFeedback,
     triggerTempoBell,
     triggerBrushSplinters,
     triggerBrushRain,
