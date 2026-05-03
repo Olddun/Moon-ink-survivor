@@ -2086,13 +2086,13 @@
     game.gems.push({ x, y, r: 7 + Math.min(value, 6), value, vy: rand(-18, 18), life: 0 });
   }
 
-  function spawnChest(x, y, tier = "common") {
+  function spawnChest(x, y, tier = "common", rewardCount = null) {
     game.chests.push({
       x,
       y,
       r: tier === "boss" ? 24 : tier === "elite" ? 21 : 18,
       tier,
-      rewardCount: rollChestRewardCount(tier),
+      rewardCount: rewardCount ?? rollChestRewardCount(tier),
       phase: rand(0, Math.PI * 2),
       life: 0,
     });
@@ -3608,7 +3608,11 @@
     game.kills += 1;
     spawnGem(enemy.x, enemy.y, enemy.xp);
     const chestChance = enemy.type === "boss" ? 1 : enemy.type === "elite" ? 0.72 : enemy.type === "bloom" ? 0.045 : 0.025;
-    if (Math.random() < chestChance) spawnChest(enemy.x + rand(-12, 12), enemy.y + rand(-12, 12), enemy.type === "boss" ? "boss" : enemy.type === "elite" ? "elite" : "common");
+    if (Math.random() < chestChance) {
+      const chestTier = enemy.type === "boss" ? "boss" : enemy.type === "elite" ? "elite" : "common";
+      const bossRewardCount = enemy.type === "boss" ? (enemy.bossTier >= 2 ? 5 : 3) : null;
+      spawnChest(enemy.x + rand(-12, 12), enemy.y + rand(-12, 12), chestTier, bossRewardCount);
+    }
     spawnParticles(enemy.x, enemy.y, enemy.color, enemy.type === "boss" ? 42 : 12);
     const p = game.player;
     if (p.branches.flameCinder && enemy.ember > 0 && !enemy.cinderSpent) {
@@ -3631,6 +3635,8 @@
       game.bossesDefeated += 1;
       game.nextBossKills = game.kills + 28 + game.bossesDefeated * 16;
       game.eliteTimer = 8;
+      game.blooms.push({ x: enemy.x, y: enemy.y, r: 18, max: 150 + (enemy.bossTier || 1) * 18, life: 0.74, color: enemy.bossTier >= 2 ? palette.gold : palette.lilac, kind: "bossReward", bossKind: enemy.bossKind });
+      shake = Math.max(shake, enemy.bossTier >= 2 ? 12 : 8);
     }
   }
 
@@ -6330,7 +6336,7 @@
       }
       ctx.restore();
     }
-    if (bloom.kind === "bossSpawn" || bloom.kind === "bossWarn" || bloom.kind === "bossRing" || bloom.kind === "bossBeam" || bloom.kind === "bossStorm") {
+    if (bloom.kind === "bossSpawn" || bloom.kind === "bossWarn" || bloom.kind === "bossRing" || bloom.kind === "bossBeam" || bloom.kind === "bossStorm" || bloom.kind === "bossReward") {
       ctx.save();
       ctx.translate(bloom.x, bloom.y);
       const bossKind = bloom.bossKind || (bloom.kind === "bossStorm" ? "storm" : bloom.kind === "bossBeam" ? "beam" : "ring");

@@ -310,7 +310,10 @@ async function main() {
         cooldown: first?.skillCooldown || 0,
       };
       if (first) debug.triggerInkBurst(first.x, first.y, 220, 999999);
+      const firstBossChestReward = game.chests.find((chest) => chest.tier === "boss")?.rewardCount || 0;
+      const firstRewardBurst = game.blooms.some((bloom) => bloom.kind === "bossReward");
       const nextTarget = game.nextBossKills;
+      game.chests.length = 0;
       game.kills = nextTarget;
       player.hp = player.maxHp;
       player.invuln = 0;
@@ -330,6 +333,9 @@ async function main() {
         cooldown: second?.skillCooldown || 0,
       };
       const activeName = second ? debug.bossDisplayName(second) : "";
+      if (second) debug.triggerInkBurst(second.x, second.y, 220, 999999);
+      const secondBossChestReward = game.chests.find((chest) => chest.tier === "boss")?.rewardCount || 0;
+      const secondRewardBurst = game.blooms.some((bloom) => bloom.kind === "bossReward" && bloom.color);
       const killTriggered = game.kills >= 2;
       const bossDefeated = game.bossesDefeated >= 1;
       player.hp = snapshot.hp;
@@ -352,6 +358,8 @@ async function main() {
         firstSkillVisible: firstSkill.blooms > 0 || firstSkill.beams > 0,
         firstSkillThreat: firstSkill.hpLost,
         bossDefeated,
+        firstBossChestReward,
+        firstRewardBurst,
         nextTarget,
         nextTargetAdvanced: nextTarget > 2,
         secondSpawned: !!second,
@@ -359,6 +367,8 @@ async function main() {
         secondKind: secondSkill.kind,
         secondSkillVisible: secondSkill.blooms > 0 || secondSkill.beams > 0,
         secondStronger: secondSkill.tier > firstSkill.tier && secondSkill.cooldown > 0 && secondSkill.cooldown <= firstSkill.cooldown,
+        secondBossChestReward,
+        secondRewardBurst,
         activeName,
       };
     });
@@ -2664,12 +2674,16 @@ async function main() {
     desktop.bossEncounter.firstSkillVisible &&
     desktop.bossEncounter.firstSkillThreat &&
     desktop.bossEncounter.bossDefeated &&
+    desktop.bossEncounter.firstBossChestReward === 3 &&
+    desktop.bossEncounter.firstRewardBurst &&
     desktop.bossEncounter.nextTargetAdvanced &&
     desktop.bossEncounter.secondSpawned &&
     desktop.bossEncounter.secondTier === 2 &&
     desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind &&
     desktop.bossEncounter.secondSkillVisible &&
     desktop.bossEncounter.secondStronger &&
+    desktop.bossEncounter.secondBossChestReward === 5 &&
+    desktop.bossEncounter.secondRewardBurst &&
     desktop.bossEncounter.activeName.includes("首领") &&
     desktop.upgraded &&
     desktop.sawAbility &&
@@ -3168,7 +3182,7 @@ async function main() {
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
-  note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.activeName.includes("首领"));
+  note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.firstBossChestReward === 3 && desktop.bossEncounter.firstRewardBurst && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.secondBossChestReward === 5 && desktop.bossEncounter.secondRewardBurst && desktop.bossEncounter.activeName.includes("首领"));
   note("run goal", desktop.buildPanelsInitial.goalText.includes("盼头") && /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) && /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText));
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|更常发动|高风险|慢，但很痛/.test(desktop.routeToast.text));
   note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));
