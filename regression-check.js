@@ -289,8 +289,9 @@ async function main() {
           effectText: buttons.map((button) => button.querySelector(".choice-effect")?.textContent || "").join("|"),
           synergy: buttons.every((button) => (button.querySelector(".choice-synergy")?.textContent || "").trim().length > 0),
           synergyText: buttons.map((button) => button.querySelector(".choice-synergy")?.textContent || "").join("|"),
-          fit: buttons.every((button) => (button.querySelector(".choice-fit")?.textContent || "").includes("主线")),
-          fitText: buttons.map((button) => button.querySelector(".choice-fit")?.textContent || "").join("|"),
+          noFitLine: buttons.every((button) => !button.querySelector(".choice-fit")),
+          conciseCards: buttons.every((button) => (button.textContent || "").length < 240),
+          plainNotes: buttons.every((button) => !(button.querySelector(".choice-desc")?.textContent || "").includes("出现条件")),
           upgradePlan: document.querySelector("#upgradePlan")?.textContent || "",
           upgradePlanCards: document.querySelectorAll("#upgradePlan span").length,
           upgradePlanColumns: getComputedStyle(document.querySelector("#upgradePlan")).gridTemplateColumns,
@@ -2570,8 +2571,9 @@ async function main() {
     desktop.choiceStyle.effectText.includes("本次") &&
     desktop.choiceStyle.synergy &&
     /玩法|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
-    desktop.choiceStyle.fit &&
-    desktop.choiceStyle.fitText.includes("主线") &&
+    desktop.choiceStyle.noFitLine &&
+    desktop.choiceStyle.conciseCards &&
+    desktop.choiceStyle.plainNotes &&
     desktop.choiceStyle.upgradePlanCards === 3 &&
     desktop.choiceStyle.upgradePlan.includes("主线") &&
     desktop.choiceStyle.upgradePlan.includes("下一步") &&

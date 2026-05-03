@@ -1092,8 +1092,7 @@ body[data-game-state="menu"] .route-toast {
 
 .choice-level,
 .choice-effect,
-.choice-synergy,
-.choice-fit {
+.choice-synergy {
   display: block;
   margin-bottom: 5px;
   border-radius: 7px;
@@ -1126,14 +1125,6 @@ body[data-game-state="menu"] .route-toast {
   color: #4f535a;
   font-size: 10px;
   box-shadow: inset 0 0 16px color-mix(in srgb, var(--reward-b) 8%, transparent);
-}
-
-.choice-fit {
-  padding: 4px 7px;
-  border: 1px dashed color-mix(in srgb, var(--reward-b) 30%, transparent);
-  background: rgba(255, 249, 237, 0.52);
-  color: #5b4d32;
-  font-size: 10px;
 }
 
 .route-compare {

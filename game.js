@@ -4080,10 +4080,45 @@
     return hints[id] || "流派：通用成长，补强当前构筑";
   }
 
+  function plainChoiceTerm(text = "") {
+    return text
+      .replace(/墨锋/g, "飞刃")
+      .replace(/墨印/g, "爆印")
+      .replace(/星铃/g, "转圈铃")
+      .replace(/星盘/g, "转圈铃核心")
+      .replace(/月焰/g, "火圈")
+      .replace(/余烬/g, "火种")
+      .replace(/霜弦/g, "冰线")
+      .replace(/流萤灯/g, "追踪光点")
+      .replace(/流萤/g, "光点")
+      .replace(/引露脉冲/g, "拾取冲击波")
+      .replace(/月露/g, "经验")
+      .replace(/照影符/g, "直线大光")
+      .replace(/玉简雷/g, "落雷")
+      .replace(/雨墨针/g, "针雨")
+      .replace(/玉扇风/g, "大扇风")
+      .replace(/墨莲伞/g, "护身伞")
+      .replace(/万象墨锋/g, "超飞刃")
+      .replace(/星河轮/g, "超转圈铃")
+      .replace(/白月焰莲/g, "超火莲")
+      .replace(/霜月琴/g, "超冰琴")
+      .replace(/天雨织机/g, "超雨网")
+      .replace(/清风玉阙/g, "超风墙")
+      .replace(/裂月镜/g, "爆印月片")
+      .replace(/露砂漏/g, "冲击波加速")
+      .replace(/漆钥/g, "宝箱充能")
+      .replace(/分枝砚/g, "分支加速")
+      .replace(/宝箱棱镜/g, "宝箱触发分支")
+      .replace(/重响磬/g, "慢武器重响")
+      .replace(/照影回文/g, "暗场爆发")
+      .replace(/暗幕大激光/g, "大激光");
+  }
+
   function conciseUpgradeSynergy(upgrade) {
-    const text = describeUpgradeSynergy(upgrade)
+    const text = plainChoiceTerm(describeUpgradeSynergy(upgrade))
       .replace(/^流派：/, "玩法：")
       .replace(/后续看/g, "追")
+      .replace(/联动/g, "配合")
       .replace(/当前局：/g, "")
       .trim();
     const [head, tail = ""] = text.split("，");
@@ -4112,7 +4147,7 @@
       card.dataset.type = up.type || "升级";
       const routeOptions = getRouteOptions(up);
       const note = describeChoiceNote(up);
-      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${choiceDisplayName(up)}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次：选 1 条路线，马上生效" : conciseUpgradeEffect(up)}</span><span class="choice-synergy">${conciseUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}${note ? `<span class="choice-desc">${note}</span>` : ""}`;
+      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${choiceDisplayName(up)}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次：选 1 条路线，马上生效" : conciseUpgradeEffect(up)}</span><span class="choice-synergy">${conciseUpgradeSynergy(up)}</span>${renderRouteChoices(up, routeOptions)}${note ? `<span class="choice-desc">${note}</span>` : ""}`;
       const choose = async (upgrade) => {
         if (transitioning) return;
         applyUpgrade(upgrade);
@@ -4327,7 +4362,13 @@
   function describeChoiceNote(upgrade) {
     const text = upgrade.baseDesc || upgrade.desc || "";
     const conditionMatch = text.match(/^(合成：[^。]+。|[^。]+后出现。)/);
-    if (conditionMatch) return conditionMatch[1].replace(/^合成：/, "出现条件：").replace(/后出现。$/, "后会加入候选。");
+    if (conditionMatch) {
+      const condition = conditionMatch[1]
+        .replace(/^合成：/, "")
+        .replace(/后出现。$/, "")
+        .replace(/。$/, "");
+      return `需要：${plainChoiceTerm(condition)}。`;
+    }
     return "";
   }
 
