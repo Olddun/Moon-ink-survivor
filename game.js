@@ -982,6 +982,20 @@
     umbrella: { guard: "umbrellaGuard", spine: "umbrellaSpine" },
   };
 
+  const buildArchetypeMeta = {
+    "archetype-ink": { id: "archetype-ink", name: "墨印贯穿" },
+    "archetype-star": { id: "archetype-star", name: "星铃回旋" },
+    "archetype-flame": { id: "archetype-flame", name: "月焰爆发" },
+    "archetype-dew": { id: "archetype-dew", name: "引露拾取" },
+    "archetype-frost": { id: "archetype-frost", name: "霜弦控场" },
+    "archetype-sigil": { id: "archetype-sigil", name: "照影暗场" },
+    "archetype-jade": { id: "archetype-jade", name: "玉简点杀" },
+    "archetype-needle": { id: "archetype-needle", name: "针雨定点" },
+    "archetype-fan": { id: "archetype-fan", name: "玉扇控场" },
+    "archetype-umbrella": { id: "archetype-umbrella", name: "墨莲反打" },
+    "archetype-crane": { id: "archetype-crane", name: "纸鹤蓄势" },
+  };
+
   const codexSections = [
     {
       title: "角色特性",
@@ -3928,7 +3942,7 @@
       card.dataset.baseId = up.baseId || up.id;
       card.dataset.type = up.type || "升级";
       const routeOptions = getRouteOptions(up);
-      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${up.baseName || up.name}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次升级从下面 2 条路线里选 1 条；以后再升级还可以重新选。" : describeUpgradeEffect(up)}</span><span class="choice-synergy">${describeUpgradeSynergy(up)}</span>${renderRouteChoices(up, routeOptions)}<span class="choice-desc">${describeChoiceNote(up)}</span>`;
+      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${up.baseName || up.name}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次升级从下面 2 条路线里选 1 条；以后再升级还可以重新选。" : describeUpgradeEffect(up)}</span><span class="choice-synergy">${describeUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}<span class="choice-desc">${describeChoiceNote(up)}</span>`;
       const choose = async (upgrade) => {
         if (transitioning) return;
         applyUpgrade(upgrade);
@@ -3986,6 +4000,63 @@
   function getRoutePickCount(route) {
     const modKey = routeModKeys[route.baseId || route.id]?.[route.variantId];
     return modKey ? game.player.mods[modKey] || 0 : 0;
+  }
+
+  function describeUpgradeFit(upgrade) {
+    const current = getBuildArchetype(game.player);
+    const target = upgradeBuildTarget(upgrade);
+    if (!target) return `当前局：主线 ${current.name}；这项是通用补强，不会把你锁进某条路线。`;
+    if (target.id === current.id) return `当前局：主线 ${current.name}；这项会继续加厚主线，马上更稳。`;
+    return `当前局：主线 ${current.name}；这项会补一条 ${target.name} 副线，适合想换方向时点。`;
+  }
+
+  function upgradeBuildTarget(upgrade) {
+    const id = upgrade.baseId || upgrade.id;
+    const exact = {
+      brush: "archetype-ink",
+      "branch-brush-splinter": "archetype-ink",
+      "branch-brush-rain": "archetype-ink",
+      orb: "archetype-star",
+      "branch-orb-recall": "archetype-star",
+      "branch-orb-shatter": "archetype-star",
+      flame: "archetype-flame",
+      "branch-flame-cinder": "archetype-flame",
+      "branch-flame-tide": "archetype-flame",
+      frost: "archetype-frost",
+      "branch-frost-echo": "archetype-frost",
+      "branch-frost-lattice": "archetype-frost",
+      lantern: "archetype-dew",
+      "branch-lantern-gleam": "archetype-dew",
+      "branch-lantern-vein": "archetype-dew",
+      sigil: "archetype-sigil",
+      "branch-sigil-echo": "archetype-sigil",
+      "branch-sigil-curtain": "archetype-sigil",
+      jade: "archetype-jade",
+      "branch-jade-chain": "archetype-jade",
+      "branch-jade-ward": "archetype-jade",
+      needle: "archetype-needle",
+      "branch-needle-curtain": "archetype-needle",
+      "branch-needle-seal": "archetype-needle",
+      fan: "archetype-fan",
+      "branch-fan-gale": "archetype-fan",
+      "branch-fan-feather": "archetype-fan",
+      umbrella: "archetype-umbrella",
+      "branch-umbrella-lotus": "archetype-umbrella",
+      "branch-umbrella-echo": "archetype-umbrella",
+      "ability-crane-vow": "archetype-crane",
+      "branch-crane-echo": "archetype-crane",
+      "ability-ink-mark": "archetype-ink",
+      "ability-dew-pulse": "archetype-dew",
+      "ability-ember": "archetype-flame",
+      "evolve-void-brush": "archetype-ink",
+      "evolve-star-river": "archetype-star",
+      "evolve-moon-lotus": "archetype-flame",
+      "evolve-frost-zither": "archetype-frost",
+      "evolve-rain-loom": "archetype-needle",
+      "evolve-jade-fan": "archetype-fan",
+    }[id];
+    if (!exact) return null;
+    return buildArchetypeMeta[exact] || null;
   }
 
   function plainRouteEffect(effect = "") {

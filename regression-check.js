@@ -269,6 +269,8 @@ async function main() {
           effectText: buttons.map((button) => button.querySelector(".choice-effect")?.textContent || "").join("|"),
           synergy: buttons.every((button) => (button.querySelector(".choice-synergy")?.textContent || "").trim().length > 0),
           synergyText: buttons.map((button) => button.querySelector(".choice-synergy")?.textContent || "").join("|"),
+          fit: buttons.every((button) => (button.querySelector(".choice-fit")?.textContent || "").includes("当前局")),
+          fitText: buttons.map((button) => button.querySelector(".choice-fit")?.textContent || "").join("|"),
           routeCards: buttons.filter((button) => button.querySelectorAll(".route-option").length === 2).length,
           routeText: buttons.map((button) => [...button.querySelectorAll(".route-option")].map((route) => route.textContent || "").join(" / ")).join("|"),
           routeTags: buttons.map((button) => [...button.querySelectorAll(".route-tag")].map((tag) => tag.textContent || "").join(" / ")).join("|"),
@@ -291,7 +293,16 @@ async function main() {
       await page.waitForTimeout(1050);
       return true;
     }
+    await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      debug.game.enemies.length = 0;
+      debug.player.hp = debug.player.maxHp;
+      debug.gainXp(debug.player.nextXp);
+    });
+    await page.waitForTimeout(80);
+    await chooseVisibleUpgrade("能力");
     for (let i = 0; i < 10; i += 1) {
+      if (upgraded) break;
       await page.keyboard.down(i % 2 ? "a" : "d");
       await page.keyboard.down(i % 3 ? "s" : "w");
       await page.waitForTimeout(1200);
@@ -314,7 +325,22 @@ async function main() {
     const synergy = await page.evaluate(() => {
       const debug = window.__moonSurvivorDebug;
       const { player, game } = debug;
-      const enemy = game.enemies[0];
+      const enemy = game.enemies[0] || {
+        x: player.x + 48,
+        y: player.y,
+        r: 18,
+        hp: 120,
+        maxHp: 120,
+        dmg: 0,
+        xp: 0,
+        speed: 0,
+        color: "#3d4652",
+        phase: 0,
+        type: "test",
+        hit: 0,
+        slow: 0,
+      };
+      if (!game.enemies.includes(enemy)) game.enemies.push(enemy);
       const beforeProjectiles = game.projectiles.length;
       player.abilities.inkMark = true;
       player.relics.moonMirror = true;
@@ -2482,6 +2508,8 @@ async function main() {
     desktop.choiceStyle.effectText.includes("本次") &&
     desktop.choiceStyle.synergy &&
     /流派|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
+    desktop.choiceStyle.fit &&
+    desktop.choiceStyle.fitText.includes("主线") &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&
