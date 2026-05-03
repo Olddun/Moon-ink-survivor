@@ -255,6 +255,7 @@ async function main() {
     let sawRelic = false;
     let choiceStyle = { colored: false, icons: false };
     let routeToast = { visible: false, text: "" };
+    let routeMemory = { exists: false, text: "", thumbLabel: "" };
     async function captureChoiceStyle() {
       return page.$$eval(".choice", (buttons) => ({
           types: buttons.map((button) => button.dataset.type || ""),
@@ -1355,6 +1356,15 @@ async function main() {
           top: el ? getComputedStyle(el).top : "",
         };
       });
+      routeMemory = await page.evaluate(() => {
+        const chip = document.querySelector('#traitBuildPanel .build-chip[data-id="route-last"]');
+        const thumb = document.querySelector('#traitBuildPanel .build-thumb[data-id="route-last"]');
+        return {
+          exists: !!chip && !!thumb,
+          text: chip?.textContent || "",
+          thumbLabel: thumb?.getAttribute("aria-label") || "",
+        };
+      });
       await page.waitForTimeout(1050);
     } else {
       errors.push("needle weapon option did not appear");
@@ -2392,7 +2402,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2546,6 +2556,12 @@ async function main() {
     desktop.routeToast.text.includes("已改方向") &&
     desktop.routeToast.text.includes("雨墨针") &&
     /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text) &&
+    desktop.routeMemory.exists &&
+    desktop.routeMemory.text.includes("刚选路线") &&
+    desktop.routeMemory.text.includes("雨墨针") &&
+    desktop.routeMemory.text.includes("已生效") &&
+    desktop.routeMemory.text.includes("仍可改另一边") &&
+    desktop.routeMemory.thumbLabel.includes("刚选路线") &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&
@@ -3024,6 +3040,7 @@ async function main() {
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text));
+  note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));
   note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.routeSummaries >= 10 && desktop.codexOpen.routeSummaryText.includes("下次可改选") && desktop.codexOpen.routeSummaryText.includes("路线：") && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
   note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && desktop.codexTree.text.includes("路线1") && desktop.codexTree.text.includes("不会被上次路线锁住") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
   note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("Lv") && ["墨锋", "流萤灯", "星铃", "月焰", "霜弦", "照影符", "玉简雷", "雨墨针", "玉扇风", "墨莲伞"].some((name) => desktop.after.weaponPanel.includes(name)) && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");

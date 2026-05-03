@@ -4880,6 +4880,7 @@
     if (archetype.score >= 6) traits.push({ id: archetype.id, type: "流派", name: "当前流派", value: archetype.name, desc: archetype.desc });
     const directionScore = Object.values(p.mods).reduce((sum, value) => sum + value, 0);
     if (directionScore) traits.push({ id: "focus", type: "能力", name: "构筑方向", value: `已选 ${directionScore}`, desc: "每次武器升级都可二选一改变方向" });
+    if (game.lastVariant) traits.push({ id: "route-last", type: "流派", name: "刚选路线", value: game.lastVariant.replace("：", " · "), desc: "这次路线选择已生效；以后再升级同一武器仍可改另一边。" });
     if (getPickCount("focus") > 0 && p.focusStillness > 0.55) traits.push({ id: "focus", type: "能力", name: "静止凝神", value: getPickCount("focus") >= 2 && p.focusStillness > 1.05 ? "激光" : "攻速+", desc: "清辉入定后，站定换取攻速和额外光束" });
     for (const pick of game.picks.filter((item) => ["身法", "生存"].includes(item.type))) {
       traits.push({ ...pick, value: `Lv ${pick.count}/${upgradeCaps[pick.id] || "∞"}` });
