@@ -65,6 +65,20 @@ async function main() {
       state: window.__moonSurvivorDebug.state,
       bodyState: document.body.dataset.gameState,
     }));
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(120);
+    const escPauseOpened = await page.evaluate(() => ({
+      visible: document.querySelector("#pauseOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(160);
+    const escPauseResumed = await page.evaluate(() => ({
+      hidden: !document.querySelector("#pauseOverlay").classList.contains("visible"),
+      state: window.__moonSurvivorDebug.state,
+      bodyState: document.body.dataset.gameState,
+    }));
     await page.click("#pauseButton");
     await page.waitForTimeout(80);
     await page.click("#pauseRestartButton");
@@ -2403,7 +2417,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, escPauseOpened, escPauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2464,6 +2478,12 @@ async function main() {
     desktop.pauseOpened.buttons.includes("回到主菜单") &&
     desktop.pauseResumed.hidden &&
     desktop.pauseResumed.state === "playing" &&
+    desktop.escPauseOpened.visible &&
+    desktop.escPauseOpened.state === "paused" &&
+    desktop.escPauseOpened.bodyState === "paused" &&
+    desktop.escPauseResumed.hidden &&
+    desktop.escPauseResumed.state === "playing" &&
+    desktop.escPauseResumed.bodyState === "playing" &&
     desktop.pauseRestarted.state === "playing" &&
     desktop.pauseRestarted.pauseHidden &&
     desktop.pauseRestarted.startHidden &&

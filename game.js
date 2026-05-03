@@ -6566,9 +6566,16 @@
       if (ui.codex.classList.contains("visible")) closeCodex();
       else openCodex();
     }
-    if (event.key === "Escape" && ui.codex.classList.contains("visible")) closeCodex();
-    else if (event.key === "Escape" && canFreezeRun()) pauseRun();
-    else if (event.key === "Escape" && state === "paused") resumeRun();
+    if (event.key === "Escape" && ui.codex.classList.contains("visible")) {
+      event.preventDefault();
+      closeCodex();
+    } else if (event.key === "Escape" && state === "paused") {
+      event.preventDefault();
+      resumeRun();
+    } else if (event.key === "Escape" && canFreezeRun()) {
+      event.preventDefault();
+      pauseRun();
+    }
   });
 
   window.addEventListener("keyup", (event) => {
