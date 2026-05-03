@@ -193,7 +193,12 @@ canvas {
   width: min(176px, calc(50vw - 34px));
   max-height: 118px;
   padding: 8px;
+  overflow: hidden;
   box-shadow: 0 12px 34px rgba(31, 38, 48, 0.08);
+}
+
+.build-panel[data-expanded="true"] {
+  overflow-y: auto;
 }
 
 .build-weapons {
@@ -348,6 +353,46 @@ body[data-game-state="menu"] .pause-button {
   color: var(--ink);
 }
 
+.build-panel-plan {
+  display: grid;
+  gap: 4px;
+  margin: 7px 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(31, 38, 48, 0.1);
+  border-left: 4px solid rgba(43, 122, 120, 0.48);
+  border-radius: 7px;
+  background:
+    linear-gradient(120deg, rgba(43, 122, 120, 0.1), rgba(255, 249, 237, 0.68)),
+    rgba(255, 249, 237, 0.7);
+}
+
+.build-relics .build-panel-plan {
+  border-left-color: rgba(201, 154, 46, 0.58);
+  background:
+    linear-gradient(120deg, rgba(201, 154, 46, 0.13), rgba(255, 249, 237, 0.68)),
+    rgba(255, 249, 237, 0.7);
+}
+
+.build-traits .build-panel-plan {
+  border-left-color: rgba(215, 90, 74, 0.48);
+  background:
+    linear-gradient(120deg, rgba(215, 90, 74, 0.1), rgba(255, 249, 237, 0.68)),
+    rgba(255, 249, 237, 0.7);
+}
+
+.build-panel-plan b {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 930;
+}
+
+.build-panel-plan span {
+  color: #4f535a;
+  font-size: 10px;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
 .build-chip[data-type="武器"] {
   border-left-color: var(--teal);
 }
@@ -413,6 +458,15 @@ body[data-game-state="menu"] .pause-button {
   font-size: 10px;
   font-style: normal;
   font-weight: 900;
+}
+
+.build-chip small {
+  grid-column: 2 / 4;
+  margin-top: -2px;
+  color: #5d6267;
+  font-size: 9px;
+  font-weight: 760;
+  line-height: 1.25;
 }
 
 .build-empty {

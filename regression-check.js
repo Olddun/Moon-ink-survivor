@@ -194,6 +194,9 @@ async function main() {
       expanded: [...document.querySelectorAll(".build-panel")].map((panel) => panel.dataset.expanded),
       detailVisible: [...document.querySelectorAll(".build-panel")].every((panel) => getComputedStyle(panel.querySelector(".build-panel-items")).display !== "none"),
       toggles: [...document.querySelectorAll(".build-panel-toggle")].map((button) => button.getAttribute("aria-expanded")),
+      plans: [...document.querySelectorAll(".build-panel-plan")].map((node) => node.textContent || ""),
+      chipHints: [...document.querySelectorAll(".build-chip small")].map((node) => node.textContent || ""),
+      scrollable: [...document.querySelectorAll(".build-panel")].every((panel) => getComputedStyle(panel).overflowY === "auto"),
     }));
     await page.evaluate(() => {
       const debug = window.__moonSurvivorDebug;
@@ -2485,6 +2488,12 @@ async function main() {
     desktop.buildPanelsExpanded.expanded.every((state) => state === "true") &&
     desktop.buildPanelsExpanded.toggles.every((state) => state === "true") &&
     desktop.buildPanelsExpanded.detailVisible &&
+    desktop.buildPanelsExpanded.plans.length === 3 &&
+    desktop.buildPanelsExpanded.plans.some((text) => text.includes("当前主线")) &&
+    desktop.buildPanelsExpanded.plans.some((text) => text.includes("下一步") || text.includes("继续")) &&
+    desktop.buildPanelsExpanded.plans.some((text) => text.includes("流派方向")) &&
+    desktop.buildPanelsExpanded.chipHints.length >= 3 &&
+    desktop.buildPanelsExpanded.scrollable &&
     desktop.buildPanelsInitial.icons >= 3 &&
     desktop.buildPanelsInitial.weaponText.includes("流萤灯") &&
     desktop.buildPanelsInitial.weaponRouteReadable &&

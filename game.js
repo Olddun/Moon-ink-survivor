@@ -4635,21 +4635,56 @@
   function renderBuildPanels() {
     const p = game.player;
     if (!p) return;
-    renderBuildPanel(ui.weaponBuildPanel, "武器", collectWeapons(p));
-    renderBuildPanel(ui.relicBuildPanel, "遗物", collectRelics(p));
-    renderBuildPanel(ui.traitBuildPanel, "特性", collectTraits(p));
+    renderBuildPanel(ui.weaponBuildPanel, "武器", collectWeapons(p), p);
+    renderBuildPanel(ui.relicBuildPanel, "遗物", collectRelics(p), p);
+    renderBuildPanel(ui.traitBuildPanel, "特性", collectTraits(p), p);
   }
 
-  function renderBuildPanel(panel, title, items) {
+  function renderBuildPanel(panel, title, items, player) {
     const expanded = !!buildPanelExpanded[panel.id];
     panel.dataset.expanded = expanded ? "true" : "false";
     const thumbHtml = items.length
       ? items.map((item) => `<span class="build-thumb" data-id="${item.id}" data-type="${item.type}" title="${item.name} ${item.value || ""} · ${item.desc || ""}" aria-label="${item.name} ${item.value || ""}" tabindex="0"><span class="mini-glyph" data-glyph="${item.id}" aria-hidden="true"></span></span>`).join("")
       : `<span class="build-thumb build-thumb-empty" title="未选择" aria-label="${title}未选择"></span>`;
     const itemHtml = items.length
-      ? items.map((item) => `<div class="build-chip" data-id="${item.id}" data-type="${item.type}" title="${item.desc || item.name}"><span class="mini-glyph" data-glyph="${item.id}" aria-hidden="true"></span><b>${item.name}</b><em>${item.value || ""}</em></div>`).join("")
+      ? items.map((item) => `<div class="build-chip" data-id="${item.id}" data-type="${item.type}" title="${item.desc || item.name}"><span class="mini-glyph" data-glyph="${item.id}" aria-hidden="true"></span><b>${item.name}</b><em>${item.value || ""}</em><small>${buildItemHint(item)}</small></div>`).join("")
       : `<div class="build-empty">未选择</div>`;
-    panel.innerHTML = `<div class="build-panel-title"><span>${title}</span><strong>${items.length}</strong><button class="build-panel-toggle" type="button" aria-label="${expanded ? "收起" : "展开"}${title}面板" aria-expanded="${expanded}">${expanded ? "−" : "+"}</button></div><div class="build-panel-thumbs" aria-label="${title}缩略图">${thumbHtml}</div><div class="build-panel-items">${itemHtml}</div>`;
+    const planHtml = buildPanelPlan(title, items, player);
+    panel.innerHTML = `<div class="build-panel-title"><span>${title}</span><strong>${items.length}</strong><button class="build-panel-toggle" type="button" aria-label="${expanded ? "收起" : "展开"}${title}面板" aria-expanded="${expanded}">${expanded ? "−" : "+"}</button></div><div class="build-panel-thumbs" aria-label="${title}缩略图">${thumbHtml}</div><div class="build-panel-items">${planHtml}${itemHtml}</div>`;
+  }
+
+  function buildItemHint(item) {
+    if (!item.desc) return "已生效";
+    return item.desc.length > 34 ? `${item.desc.slice(0, 34)}…` : item.desc;
+  }
+
+  function buildPanelPlan(title, items, p) {
+    if (!p) return "";
+    const archetype = getBuildArchetype(p);
+    if (title === "武器") {
+      return `<div class="build-panel-plan"><b>当前主线：${archetype.name}</b><span>${nextBuildGoal(p, archetype)}</span></div>`;
+    }
+    if (title === "遗物") {
+      return `<div class="build-panel-plan"><b>遗物规则：${items.length || 0} 件</b><span>${items.length ? "优先拿能触发当前武器分支的遗物，宝箱和站定收益会更明显。" : "还没有遗物；先拿能改变规则的奖励，别只堆数值。"}</span></div>`;
+    }
+    return `<div class="build-panel-plan"><b>流派方向：${archetype.name}</b><span>${archetype.desc.replace(/^核心：/, "看这些：")}</span></div>`;
+  }
+
+  function nextBuildGoal(p, archetype) {
+    const goals = {
+      "archetype-ink": p.evolutions.voidBrush ? "万象墨锋已成型；继续拿散毫、骤雨或分枝砚来放大触发。" : p.brushCount < 6 ? "继续升墨锋，并在更快出手/单下更狠之间按手感改选。" : "找墨印连锁、裂月镜或散毫/骤雨，准备万象墨锋。",
+      "archetype-star": p.evolutions.starRiver ? "星河轮已成型；继续拿碎星、归潮和宝箱棱镜。" : p.orbs < 4 ? "先把星铃升到 4 枚，再找星盘或碎星。" : "找星盘、碎星或归潮，让回旋伤害马上变明显。",
+      "archetype-flame": p.evolutions.moonLotus ? "白月焰莲已成型；继续拿烬环和潮汐，让低频爆发更大。" : p.flameLevel < 3 ? "先把月焰升到 3 层，再找余烬或引露联动。" : "找余烬织线、烬环或潮汐，准备白月焰莲。",
+      "archetype-dew": p.evolutions.rainLoom ? "拾取循环已很强；继续拿聚辉、织径、漆钥和宝箱奖励。" : p.lanternLevel < 5 ? "继续升流萤灯；飞得更勤更稳，每下更亮单次更痛。" : "找聚辉、织径、露砂漏或漆钥，把拾取变成伤害。",
+      "archetype-frost": p.evolutions.frostZither ? "霜月琴已成型；继续拿封阵和裂音扩大控场。" : p.frostLevel < 4 ? "先把霜弦升高，长线控场和命中返利都能选。" : "找裂音、封阵和引露脉冲，准备霜月琴。",
+      "archetype-sigil": p.sigilLevel < 3 ? "先把照影符升到 3 级；它慢，但每次命中收益要高。" : "找裂月镜、回文或折幕，低频出手要换大范围反馈。",
+      "archetype-jade": p.jadeLevel < 4 ? "继续升玉简雷；多目标更稳，重击减速单次回报更高。" : "找连弧、镇域、清辉入定或重响磬，让慢武器更值。",
+      "archetype-needle": p.evolutions.rainLoom ? "天雨织机已成型；继续拿雨墨帘和定雨纹放大雨线。" : p.needleLevel < 5 ? "继续升雨墨针；多落一针更稳，慢敌更痛适合减速流。" : "找引露脉冲和任意针雨分支，准备天雨织机。",
+      "archetype-fan": p.evolutions.jadeFan ? "清风玉阙已成型；继续拿回廊和裂羽扩大风墙。" : p.fanLevel < 5 ? "继续升玉扇风；宽扇控场，回风返场是慢触发高回报。" : "找玉扇回廊和清辉入定/引露脉冲，准备清风玉阙。",
+      "archetype-umbrella": p.umbrellaLevel < 4 ? "继续升墨莲伞；护圈保命，反刺让被围时马上反打。" : "找墨伞莲阵、伞影回潮或重响磬，把近身风险换成收益。",
+      "archetype-crane": p.abilities.craneVow ? "站定蓄纸鹤，移动时释放；配风步、回羽和寂光砚。" : "找纸鹤誓约或清辉入定，把站定变成可见爆发。",
+    };
+    return goals[archetype.id] || "继续拿和当前武器同方向的分支，优先选择能马上看见反馈的奖励。";
   }
 
   function weaponRouteValue(levelText, routes) {
