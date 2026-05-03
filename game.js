@@ -308,7 +308,7 @@
       id: "branch-brush-rain",
       type: "武器",
       name: "墨锋骤雨",
-      desc: "墨锋 4 重后出现。墨锋齐射会积攒碑拓，满后落下直线墨雨；站定凝神会更快触发。",
+      desc: "墨锋 4 重后出现。墨锋齐射会蓄力，蓄满后落下直线墨雨；站着不动会更快发动。",
       available: (p) => p.brushCount >= 4 && p.branches.brushRain < upgradeCaps["branch-brush-rain"],
       apply: (p) => {
         p.branches.brushRain += 1;
@@ -587,7 +587,7 @@
       id: "branch-jade-ward",
       type: "武器",
       name: "玉简镇域",
-      desc: "玉简雷 4 重后出现。雷刻落点展开镇域方阵，触发慢但大范围减速；站定凝神和寂光砚会显著扩大收益。",
+      desc: "玉简雷 4 重后出现。雷刻落点展开大雷区，触发慢但大范围减速；站定大激光和小激光镜会显著扩大收益。",
       available: (p) => p.jadeLevel >= 4 && p.branches.jadeWard < upgradeCaps["branch-jade-ward"],
       apply: (p) => {
         p.branches.jadeWard += 1;
@@ -609,7 +609,7 @@
       id: "branch-sigil-curtain",
       type: "武器",
       name: "照影折幕",
-      desc: "照影符 3 级后出现。影符命中会折出暗幕光束；站定凝神时光束更多、收益更高。",
+      desc: "照影符 3 级后出现。影符命中会折出暗幕大激光；站着不动时激光更多、收益更高。",
       available: (p) => p.sigilLevel >= 3 && p.branches.sigilCurtain < upgradeCaps["branch-sigil-curtain"],
       apply: (p) => {
         p.branches.sigilCurtain += 1;
@@ -641,8 +641,8 @@
     {
       id: "focus",
       type: "身法",
-      name: "清辉入定",
-      desc: "所有伤害小幅提升；首次选择后，站定才会获得攻速收益，高等级解锁凝神激光。",
+      name: "站定大激光",
+      desc: "所有伤害小幅提升；站住不动会越打越快，2 级后射出大激光。",
       available: () => getPickCount("focus") < upgradeCaps.focus,
       apply: (p) => {
         p.damageMult += 0.16;
@@ -809,8 +809,8 @@
     {
       id: "relic-focus-lens",
       type: "遗物",
-      name: "寂光砚",
-      desc: "清辉入定或纸鹤誓约后出现。站定更早射出凝神光束，并追加两道侧光。",
+      name: "小激光镜",
+      desc: "拿过站定大激光或纸鹤后出现。站定更早射出大激光，并追加两道小激光。",
       once: true,
       available: (p) => !p.relics.focusLens && (getPickCount("focus") > 0 || p.abilities.craneVow),
       apply: (p) => {
@@ -918,7 +918,7 @@
       id: "evolve-jade-fan",
       type: "超武",
       name: "清风玉阙",
-      desc: "合成：5 重玉扇风 + 玉扇回廊 + 清辉入定或引露脉冲。扇风变成双层风墙，回廊风纹更大，站定和回风收益更明显。",
+      desc: "合成：5 重玉扇风 + 玉扇回廊 + 站定大激光或引露脉冲。扇风变成双层风墙，回廊风纹更大，站定和回风收益更明显。",
       once: true,
       available: (p) => !p.evolutions.jadeFan && p.fanLevel >= 5 && p.branches.fanGale > 0 && (getPickCount("focus") > 0 || p.abilities.dewPulse),
       apply: (p) => {
@@ -1063,7 +1063,7 @@
             { text: `分支：散毫命中 ${p.branches.brushSplinter}/3`, status: p.branches.brushSplinter ? "owned" : p.brushCount >= 3 && p.abilities.inkMark ? "ready" : "locked" },
             { text: `分支：骤雨齐射 ${p.branches.brushRain}/3`, status: p.branches.brushRain ? "owned" : p.brushCount >= 4 ? "ready" : "locked" },
             { text: "联动：墨印连锁引爆", status: p.abilities.inkMark ? "owned" : "locked" },
-            { text: "联动：站定凝神加速骤雨", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动会更快落墨雨", status: p.focusStillness > 0.55 ? "owned" : "ready" },
             { text: "联动：裂月镜额外散毫", status: p.relics.moonMirror ? "owned" : "locked" },
             { text: "终点：万象墨锋", status: p.evolutions.voidBrush ? "owned" : p.brushCount >= 3 && p.abilities.inkMark ? "ready" : "locked" },
           ],
@@ -1089,7 +1089,7 @@
           id: "branch-brush-rain",
           type: "武器",
           name: "墨锋骤雨",
-          desc: "墨锋第二分支。齐射积攒碑拓，满后落下纵横墨雨；站定凝神可更快触发，适合冷却和阵地流。",
+          desc: "墨锋第二分支。齐射蓄力，蓄满后落下纵横墨雨；站着不动会更快发动，适合喜欢守阵地的玩法。",
           state: (p) => (p.branches.brushRain ? `Lv ${p.branches.brushRain}/${upgradeCaps["branch-brush-rain"]}` : p.brushCount >= 4 ? "可出现" : "需墨锋 4 重"),
           owned: (p) => p.branches.brushRain > 0,
           ready: (p) => p.brushCount >= 4 && p.branches.brushRain < upgradeCaps["branch-brush-rain"],
@@ -1098,7 +1098,7 @@
             { text: `分支等级 ${p.branches.brushRain}/3`, status: p.branches.brushRain ? "owned" : "ready" },
             { text: "触发：墨锋齐射积攒碑拓", status: p.branches.brushRain ? "owned" : "locked" },
             { text: "博弈：触发较慢，换多道贯穿墨柱", status: p.branches.brushRain ? "owned" : "ready" },
-            { text: "联动：站定凝神加快积攒", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动更快蓄满", status: p.focusStillness > 0.55 ? "owned" : "ready" },
             { text: "联动：万象墨锋提升墨雨数量", status: p.evolutions.voidBrush ? "owned" : "locked" },
             { text: "联动：分枝砚/匣纹棱镜", status: p.relics.branchInkstone || p.relics.chestPrism ? "ready" : "locked" },
           ],
@@ -1255,7 +1255,7 @@
             { text: `分支等级 ${p.branches.frostLattice}/3`, status: p.branches.frostLattice ? "owned" : "ready" },
             { text: "触发：霜弦命中展开六角霜阵", status: p.branches.frostLattice ? "owned" : "locked" },
             { text: "博弈：触发较慢，换强控场和可见阵地", status: p.branches.frostLattice ? "owned" : "ready" },
-            { text: "联动：站定凝神扩大霜阵", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动让冰圈更大", status: p.focusStillness > 0.55 ? "owned" : "ready" },
             { text: "联动：霜月琴让霜阵更大更久", status: p.evolutions.frostZither ? "owned" : "locked" },
             { text: "联动：引露脉冲/分枝砚", status: p.abilities.dewPulse || p.relics.branchInkstone ? "ready" : "locked" },
           ],
@@ -1331,7 +1331,7 @@
             { text: `分支：照影折幕 ${p.branches.sigilCurtain}/3`, status: p.branches.sigilCurtain ? "owned" : p.sigilLevel >= 3 ? "ready" : "locked" },
             { text: "博弈：冷却长，单次贯穿和暗场收益高", status: p.sigilLevel > 0 ? "ready" : "locked" },
             { text: "联动：裂月镜解锁回文", status: p.relics.moonMirror ? "owned" : "locked" },
-            { text: "联动：站定凝神强化折幕", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动强化大激光", status: p.focusStillness > 0.55 ? "owned" : "ready" },
             { text: "联动：宝箱棱镜折射回照", status: p.relics.chestPrism ? "ready" : "locked" },
           ],
         },
@@ -1351,14 +1351,14 @@
             { text: "博弈：触发慢，但点杀和减速很清楚", status: p.jadeLevel > 0 ? "ready" : "locked" },
             { text: `分支：连弧 ${p.branches.jadeChain}/3`, status: p.branches.jadeChain ? "owned" : p.jadeLevel >= 3 ? "ready" : "locked" },
             { text: `分支：镇域 ${p.branches.jadeWard}/3`, status: p.branches.jadeWard ? "owned" : p.jadeLevel >= 4 ? "ready" : "locked" },
-            { text: "联动：清辉入定提高站定收益", status: getPickCount("focus") > 0 ? "ready" : "locked" },
+            { text: "联动：站定大激光提高站着不动的收益", status: getPickCount("focus") > 0 ? "ready" : "locked" },
           ],
         },
         {
           id: "weapon-needle",
           type: "武器",
           name: "雨墨针",
-          desc: "新基础武器。天幕垂落细针雨，直接钉向多名敌人，和霜弦减速、引露脉冲、站定凝神形成针雨流派。",
+          desc: "新基础武器。天幕垂落细针雨，直接钉向多名敌人，和冰线减速、拾取冲击波、站定大激光形成落针玩法。",
           state: (p) => (p.needleLevel ? `雨墨针 ${p.needleLevel} 重` : "升级可遇"),
           owned: (p) => p.needleLevel > 0,
           ready: (p) => p.needleLevel < upgradeCaps.needle,
@@ -1372,7 +1372,7 @@
             { text: `分支：定雨纹 ${p.branches.needleSeal}/3`, status: p.branches.needleSeal ? "owned" : p.needleLevel >= 3 && (p.frostLevel > 0 || p.abilities.dewPulse) ? "ready" : "locked" },
             { text: "联动：减速敌人吃更高伤害", status: p.frostLevel > 0 || p.branches.frostLattice ? "ready" : "locked" },
             { text: "联动：引露脉冲获得雨纹充能", status: p.abilities.dewPulse ? "ready" : "locked" },
-            { text: "联动：站定凝神额外落针", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
+            { text: "联动：站着不动会额外落针", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
             { text: "终点：天雨织机", status: p.evolutions.rainLoom ? "owned" : p.needleLevel >= 5 && p.abilities.dewPulse && (p.branches.needleCurtain || p.branches.needleSeal) ? "ready" : "locked" },
           ],
         },
@@ -1392,7 +1392,7 @@
             { text: "博弈：出手慢，换大片减速和清身前敌人", status: p.fanLevel > 0 ? "ready" : "locked" },
             { text: `分支：回廊风纹 ${p.branches.fanGale}/3`, status: p.branches.fanGale ? "owned" : p.fanLevel >= 3 ? "ready" : "locked" },
             { text: `分支：扇缘裂羽 ${p.branches.fanFeather}/3`, status: p.branches.fanFeather ? "owned" : p.fanLevel >= 4 ? "ready" : "locked" },
-            { text: "联动：站定凝神缩短出手间隔并扩大安全区", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
+            { text: "联动：站着不动会更快出手，并扫出更大安全区", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
             { text: "联动：引露脉冲可吃回风充能", status: p.abilities.dewPulse && p.mods.fanReturn ? "ready" : "locked" },
             { text: "终点：清风玉阙", status: p.evolutions.jadeFan ? "owned" : p.fanLevel >= 5 && p.branches.fanGale && (getPickCount("focus") > 0 || p.abilities.dewPulse) ? "ready" : "locked" },
           ],
@@ -1413,7 +1413,7 @@
             { text: "取舍：护圈更安全，反刺打到外圈敌人", status: p.umbrellaLevel > 0 ? "ready" : "locked" },
             { text: `分支：墨伞莲阵 ${p.branches.umbrellaLotus}/3`, status: p.branches.umbrellaLotus ? "owned" : p.umbrellaLevel >= 3 ? "ready" : "locked" },
             { text: `分支：伞影回潮 ${p.branches.umbrellaEcho}/3`, status: p.branches.umbrellaEcho ? "owned" : p.umbrellaLevel >= 4 ? "ready" : "locked" },
-            { text: "配合：站定凝神让护伞更快张开", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
+            { text: "配合：站着不动让护伞更快张开", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
             { text: "配合：重响磬补一圈减速伤害", status: p.relics.tempoBell ? "owned" : "locked" },
           ],
         },
@@ -1468,7 +1468,7 @@
             { text: "博弈：出手慢，换更清楚的大范围减速", status: p.branches.fanGale ? "owned" : "ready" },
             { text: "取舍：回廊留场控场，裂羽追远处敌人", status: p.branches.fanFeather ? "ready" : "locked" },
             { text: "联动：回风路线会追加风纹和引露充能", status: p.mods.fanReturn ? "ready" : "locked" },
-            { text: "联动：站定凝神扩大风纹", status: p.focusStillness > 0.55 || getPickCount("focus") > 0 ? "ready" : "locked" },
+            { text: "联动：站着不动扩大风纹", status: p.focusStillness > 0.55 || getPickCount("focus") > 0 ? "ready" : "locked" },
             { text: "联动：分枝砚/匣纹棱镜", status: p.relics.branchInkstone || p.relics.chestPrism ? "ready" : "locked" },
             { text: "终点：清风玉阙会把风纹变成双层风墙", status: p.evolutions.jadeFan ? "owned" : "locked" },
           ],
@@ -1522,7 +1522,7 @@
             { text: `分支等级 ${p.branches.needleSeal}/3`, status: p.branches.needleSeal ? "owned" : "ready" },
             { text: "触发：针雨命中减速目标展开雨纹", status: p.branches.needleSeal ? "owned" : "locked" },
             { text: "收益：范围减速 + 引露充能", status: p.branches.needleSeal ? "owned" : "ready" },
-            { text: "联动：站定凝神扩大雨纹", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动扩大雨圈", status: p.focusStillness > 0.55 ? "owned" : "ready" },
           ],
         },
         {
@@ -1539,24 +1539,24 @@
             { text: "触发：雷刻命中后折出连弧", status: p.branches.jadeChain ? "owned" : "locked" },
             { text: "博弈：触发慢，换敌群连锁点杀", status: p.branches.jadeChain ? "owned" : "ready" },
             { text: "联动：分枝砚回转冷却并充能", status: p.relics.branchInkstone ? "owned" : "locked" },
-            { text: "联动：清辉入定让低频触发更密", status: getPickCount("focus") > 0 ? "ready" : "locked" },
+            { text: "联动：站定大激光让慢武器发动更密", status: getPickCount("focus") > 0 ? "ready" : "locked" },
           ],
         },
         {
           id: "branch-jade-ward",
           type: "武器",
           name: "玉简镇域",
-          desc: "玉简雷第二分支。雷刻落点展开镇域方阵，低频触发换大范围减速和阵地压制。",
+          desc: "玉简雷第二分支。雷刻落点展开大雷区，发动少但能换来大范围减速和压场。",
           state: (p) => (p.branches.jadeWard ? `Lv ${p.branches.jadeWard}/${upgradeCaps["branch-jade-ward"]}` : p.jadeLevel >= 4 ? "可出现" : "需玉简雷 4 重"),
           owned: (p) => p.branches.jadeWard > 0,
           ready: (p) => p.jadeLevel >= 4 && p.branches.jadeWard < upgradeCaps["branch-jade-ward"],
           tree: (p) => [
             { text: "条件：玉简雷 4 重", status: p.jadeLevel >= 4 ? "ready" : "locked" },
             { text: `分支等级 ${p.branches.jadeWard}/3`, status: p.branches.jadeWard ? "owned" : "ready" },
-            { text: "触发：雷刻落点展开镇域方阵", status: p.branches.jadeWard ? "owned" : "locked" },
+            { text: "触发：雷刻落点展开大雷区", status: p.branches.jadeWard ? "owned" : "locked" },
             { text: "博弈：触发慢，换大范围减速和高单次收益", status: p.branches.jadeWard ? "owned" : "ready" },
-            { text: "联动：清辉入定扩大镇域", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
-            { text: "联动：寂光砚追加白色镇域光纹", status: p.relics.focusLens ? "owned" : "locked" },
+            { text: "联动：站定大激光扩大雷区", status: getPickCount("focus") > 0 || p.focusStillness > 0.55 ? "ready" : "locked" },
+            { text: "联动：小激光镜追加白色光纹", status: p.relics.focusLens ? "owned" : "locked" },
             { text: "联动：分枝砚回转冷却并充能", status: p.relics.branchInkstone ? "owned" : "locked" },
           ],
         },
@@ -1581,16 +1581,16 @@
           id: "branch-sigil-curtain",
           type: "武器",
           name: "照影折幕",
-          desc: "照影符第二分支。影符命中时折出多道暗幕光束，站定凝神会提高光束数量和伤害。",
+          desc: "照影符第二分支。影符命中时折出多道暗幕大激光，站着不动会提高激光数量和伤害。",
           state: (p) => (p.branches.sigilCurtain ? `Lv ${p.branches.sigilCurtain}/${upgradeCaps["branch-sigil-curtain"]}` : p.sigilLevel >= 3 ? "可出现" : "需照影符 3 级"),
           owned: (p) => p.branches.sigilCurtain > 0,
           ready: (p) => p.sigilLevel >= 3 && p.branches.sigilCurtain < upgradeCaps["branch-sigil-curtain"],
           tree: (p) => [
             { text: "条件：照影符 3 级", status: p.sigilLevel >= 3 ? "ready" : "locked" },
             { text: `分支等级 ${p.branches.sigilCurtain}/3`, status: p.branches.sigilCurtain ? "owned" : "ready" },
-            { text: "触发：影符命中折出暗幕光束", status: p.branches.sigilCurtain ? "owned" : "locked" },
+            { text: "触发：影符命中折出暗幕大激光", status: p.branches.sigilCurtain ? "owned" : "locked" },
             { text: "博弈：冷却长，单次清场收益高", status: p.branches.sigilCurtain ? "owned" : "ready" },
-            { text: "联动：站定凝神额外光束", status: p.focusStillness > 0.55 ? "owned" : "ready" },
+            { text: "联动：站着不动额外射激光", status: p.focusStillness > 0.55 ? "owned" : "ready" },
             { text: "联动：分枝砚/匣纹棱镜", status: p.relics.branchInkstone || p.relics.chestPrism ? "ready" : "locked" },
           ],
         },
@@ -1617,7 +1617,7 @@
         { id: "relic-lacquer-key", type: "遗物", name: "漆钥", desc: "宝箱奖励为引露脉冲额外充能。", state: (p) => (p.relics.lacquerKey ? "已获得" : game.chestsOpened ? "可出现" : "需开启宝箱"), owned: (p) => p.relics.lacquerKey, ready: (p) => game.chestsOpened > 0 && !p.relics.lacquerKey, tree: (p) => [{ text: "条件：开启宝箱", status: game.chestsOpened ? "ready" : "locked" }, { text: "联动：引露脉冲", status: p.abilities.dewPulse ? "ready" : "locked" }] },
         { id: "relic-branch-inkstone", type: "遗物", name: "分枝砚", desc: "分支触发时回转冷却，并为引露脉冲充能。", state: (p) => (p.relics.branchInkstone ? "已获得" : totalBranchLevel(p) > 0 ? "可出现" : "需任意分支"), owned: (p) => p.relics.branchInkstone, ready: (p) => totalBranchLevel(p) > 0 && !p.relics.branchInkstone, tree: (p) => [{ text: "条件：拥有任意分支", status: totalBranchLevel(p) > 0 ? "ready" : "locked" }, { text: `当前分支等级合计 ${totalBranchLevel(p)}`, status: totalBranchLevel(p) > 0 ? "owned" : "locked" }, { text: "触发：散毫/骤雨/归潮/碎星/烬环/潮汐/聚辉/织径/回羽/裂音/封阵/回文/折幕/连弧/镇域/回廊/裂羽/莲阵", status: p.relics.branchInkstone ? "owned" : "ready" }, { text: "联动：引露脉冲充能", status: p.abilities.dewPulse ? "ready" : "locked" }] },
         { id: "relic-chest-prism", type: "遗物", name: "匣纹棱镜", desc: "宝箱奖励折射已拥有分支，奖励越多触发越多。", state: (p) => (p.relics.chestPrism ? "已获得" : game.chestsOpened > 0 && totalBranchLevel(p) > 0 ? "可出现" : "需宝箱 + 任意分支"), owned: (p) => p.relics.chestPrism, ready: (p) => game.chestsOpened > 0 && totalBranchLevel(p) > 0 && !p.relics.chestPrism, tree: (p) => [{ text: "条件：开启宝箱", status: game.chestsOpened ? "ready" : "locked" }, { text: "条件：拥有任意分支", status: totalBranchLevel(p) > 0 ? "ready" : "locked" }, { text: "1/3/5 奖励触发 1/2/3 个分支", status: p.relics.chestPrism ? "owned" : "ready" }, { text: "联动：分枝砚继续回转冷却", status: p.relics.branchInkstone ? "ready" : "locked" }] },
-        { id: "relic-focus-lens", type: "遗物", name: "寂光砚", desc: "站定凝神更早射出寂光侧束。条件：清辉入定或纸鹤誓约。", state: (p) => (p.relics.focusLens ? "已获得" : getPickCount("focus") > 0 || p.abilities.craneVow ? "可出现" : "需清辉入定/纸鹤誓约"), owned: (p) => p.relics.focusLens, ready: (p) => !p.relics.focusLens && (getPickCount("focus") > 0 || p.abilities.craneVow), tree: (p) => [{ text: "条件：清辉入定或纸鹤誓约", status: getPickCount("focus") > 0 || p.abilities.craneVow ? "ready" : "locked" }, { text: "站定 1 秒后可提前射出凝神光束", status: p.relics.focusLens ? "owned" : "ready" }, { text: "追加两道寂光侧束 + 更强震屏", status: p.relics.focusLens ? "owned" : "locked" }, { text: "联动：照影折幕/霜弦封阵阵地流", status: p.branches.sigilCurtain || p.branches.frostLattice ? "ready" : "locked" }] },
+        { id: "relic-focus-lens", type: "遗物", name: "小激光镜", desc: "站定时更早射大激光，并追加两道小激光。条件：站定大激光或纸鹤。", state: (p) => (p.relics.focusLens ? "已获得" : getPickCount("focus") > 0 || p.abilities.craneVow ? "可出现" : "需站定大激光/纸鹤"), owned: (p) => p.relics.focusLens, ready: (p) => !p.relics.focusLens && (getPickCount("focus") > 0 || p.abilities.craneVow), tree: (p) => [{ text: "条件：站定大激光或纸鹤", status: getPickCount("focus") > 0 || p.abilities.craneVow ? "ready" : "locked" }, { text: "站定 1 秒后可提前射出大激光", status: p.relics.focusLens ? "owned" : "ready" }, { text: "追加两道小激光 + 更强震屏", status: p.relics.focusLens ? "owned" : "locked" }, { text: "联动：暗幕大激光/冰圈阵地玩法", status: p.branches.sigilCurtain || p.branches.frostLattice ? "ready" : "locked" }] },
         { id: "relic-route-charm", type: "遗物", name: "转向签", desc: "选路线也会有即时回响。选过 2 次武器路线后出现。", state: (p) => (p.relics.routeCharm ? "已获得" : Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2 ? "可出现" : "需选 2 次路线"), owned: (p) => p.relics.routeCharm, ready: (p) => !p.relics.routeCharm && Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2, tree: (p) => [{ text: "条件：选过 2 次武器路线", status: Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2 ? "ready" : "locked" }, { text: "触发：以后每次选择路线", status: p.relics.routeCharm ? "owned" : "ready" }, { text: "收益：立刻回一点武器出手间隔", status: p.relics.routeCharm ? "owned" : "locked" }, { text: "联动：引露脉冲充能 + 选路回响特效", status: p.abilities.dewPulse ? "ready" : "locked" }] },
         { id: "relic-tempo-bell", type: "遗物", name: "重响磬", desc: "慢武器每次出手多一圈重响，补伤害、减速并提前下一次出手。", state: (p) => (p.relics.tempoBell ? "已获得" : slowWeaponLevel(p) >= 4 ? "可出现" : `${slowWeaponLevel(p)}/4 慢武器等级`), owned: (p) => p.relics.tempoBell, ready: (p) => !p.relics.tempoBell && slowWeaponLevel(p) >= 4, tree: (p) => [{ text: `慢武器合计 ${slowWeaponLevel(p)}/4`, status: slowWeaponLevel(p) >= 4 ? "ready" : "locked" }, { text: "怎么发动：月焰、照影符、玉简雷、雨墨针、玉扇风、墨莲伞出手", status: p.relics.tempoBell ? "owned" : "ready" }, { text: "好处：多一圈重响，伤害和减速马上可见", status: p.relics.tempoBell ? "owned" : "locked" }, { text: "配合：慢触发路线、站定阵地、引露脉冲", status: p.abilities.dewPulse || getPickCount("focus") > 0 ? "ready" : "locked" }] },
       ],
@@ -1630,7 +1630,7 @@
         { id: "evolve-moon-lotus", type: "超武", name: "白月焰莲", desc: "合成：3 层月焰 + 余烬织线。双重焰莲爆燃。", state: (p) => (p.evolutions.moonLotus ? "已合成" : p.flameLevel >= 3 && p.abilities.emberWeb ? "可合成" : `${p.flameLevel}/3 月焰 + ${p.abilities.emberWeb ? "余烬已备" : "需余烬"}`), owned: (p) => p.evolutions.moonLotus, ready: (p) => p.flameLevel >= 3 && p.abilities.emberWeb && !p.evolutions.moonLotus, tree: (p) => [{ text: "月焰 3 层", status: p.flameLevel >= 3 ? "owned" : "locked" }, { text: "余烬织线", status: p.abilities.emberWeb ? "owned" : "locked" }, { text: "双重焰莲爆燃", status: p.evolutions.moonLotus ? "owned" : "ready" }] },
         { id: "evolve-frost-zither", type: "超武", name: "霜月琴", desc: "合成：4 重霜弦 + 引露脉冲。霜弦化为琴音，寒音更快充能。", state: (p) => (p.evolutions.frostZither ? "已合成" : p.frostLevel >= 4 && p.abilities.dewPulse ? "可合成" : `${p.frostLevel}/4 霜弦 + ${p.abilities.dewPulse ? "引露已备" : "需引露"}`), owned: (p) => p.evolutions.frostZither, ready: (p) => p.frostLevel >= 4 && p.abilities.dewPulse && !p.evolutions.frostZither, tree: (p) => [{ text: "霜弦 4 重", status: p.frostLevel >= 4 ? "owned" : "locked" }, { text: "引露脉冲", status: p.abilities.dewPulse ? "owned" : "locked" }, { text: "琴音贯穿 + 寒音充能", status: p.evolutions.frostZither ? "owned" : "ready" }, { text: "联动：霜弦裂音/封阵", status: p.branches.frostEcho || p.branches.frostLattice ? "ready" : "locked" }] },
         { id: "evolve-rain-loom", type: "超武", name: "天雨织机", desc: "合成：5 重雨墨针 + 引露脉冲 + 任意针雨分支。针雨织成全局雨线网络。", state: (p) => (p.evolutions.rainLoom ? "已合成" : p.needleLevel >= 5 && p.abilities.dewPulse && (p.branches.needleCurtain || p.branches.needleSeal) ? "可合成" : `${p.needleLevel}/5 雨墨针 + ${p.abilities.dewPulse ? "引露已备" : "需引露"} + ${p.branches.needleCurtain || p.branches.needleSeal ? "分支已备" : "需针雨分支"}`), owned: (p) => p.evolutions.rainLoom, ready: (p) => p.needleLevel >= 5 && p.abilities.dewPulse && (p.branches.needleCurtain || p.branches.needleSeal) && !p.evolutions.rainLoom, tree: (p) => [{ text: "雨墨针 5 重", status: p.needleLevel >= 5 ? "owned" : "locked" }, { text: "引露脉冲", status: p.abilities.dewPulse ? "owned" : "locked" }, { text: "雨墨帘或定雨纹", status: p.branches.needleCurtain || p.branches.needleSeal ? "owned" : "locked" }, { text: "雨线网络 + 雨纹放大", status: p.evolutions.rainLoom ? "owned" : "ready" }] },
-        { id: "evolve-jade-fan", type: "超武", name: "清风玉阙", desc: "合成：5 重玉扇风 + 玉扇回廊 + 清辉入定或引露脉冲。双层风墙，回廊风纹更大。", state: (p) => (p.evolutions.jadeFan ? "已合成" : p.fanLevel >= 5 && p.branches.fanGale && (getPickCount("focus") > 0 || p.abilities.dewPulse) ? "可合成" : `${p.fanLevel}/5 玉扇风 + ${p.branches.fanGale ? "回廊已备" : "需回廊"} + ${getPickCount("focus") > 0 || p.abilities.dewPulse ? "站定/引露已备" : "需站定或引露"}`), owned: (p) => p.evolutions.jadeFan, ready: (p) => p.fanLevel >= 5 && p.branches.fanGale && (getPickCount("focus") > 0 || p.abilities.dewPulse) && !p.evolutions.jadeFan, tree: (p) => [{ text: "玉扇风 5 重", status: p.fanLevel >= 5 ? "owned" : "locked" }, { text: "玉扇回廊", status: p.branches.fanGale ? "owned" : "locked" }, { text: "清辉入定或引露脉冲", status: getPickCount("focus") > 0 || p.abilities.dewPulse ? "owned" : "locked" }, { text: "双层风墙 + 回廊放大", status: p.evolutions.jadeFan ? "owned" : "ready" }] },
+        { id: "evolve-jade-fan", type: "超武", name: "清风玉阙", desc: "合成：5 重玉扇风 + 玉扇回廊 + 站定大激光或引露脉冲。双层风墙，回廊风纹更大。", state: (p) => (p.evolutions.jadeFan ? "已合成" : p.fanLevel >= 5 && p.branches.fanGale && (getPickCount("focus") > 0 || p.abilities.dewPulse) ? "可合成" : `${p.fanLevel}/5 玉扇风 + ${p.branches.fanGale ? "回廊已备" : "需回廊"} + ${getPickCount("focus") > 0 || p.abilities.dewPulse ? "站定/引露已备" : "需站定或引露"}`), owned: (p) => p.evolutions.jadeFan, ready: (p) => p.fanLevel >= 5 && p.branches.fanGale && (getPickCount("focus") > 0 || p.abilities.dewPulse) && !p.evolutions.jadeFan, tree: (p) => [{ text: "玉扇风 5 重", status: p.fanLevel >= 5 ? "owned" : "locked" }, { text: "玉扇回廊", status: p.branches.fanGale ? "owned" : "locked" }, { text: "站定大激光或引露脉冲", status: getPickCount("focus") > 0 || p.abilities.dewPulse ? "owned" : "locked" }, { text: "双层风墙 + 回廊放大", status: p.evolutions.jadeFan ? "owned" : "ready" }] },
       ],
     },
   ];
@@ -3848,13 +3848,13 @@
       "branch-lantern-vein": `本次：流萤织径 +1，流萤命中织出光束并回转照影符（升至 Lv ${nextLevel}/${upgradeCaps["branch-lantern-vein"]}）`,
       sigil: `本次：照影符 +1，低频高伤影符更强，3 级后可走回文分支（升至 Lv ${nextLevel}/${upgradeCaps.sigil}）`,
       "branch-sigil-echo": `本次：照影回文 +1，影符命中展开更强暗场和横向光束（升至 Lv ${nextLevel}/${upgradeCaps["branch-sigil-echo"]}）`,
-      "branch-sigil-curtain": `本次：照影折幕 +1，影符命中折出暗幕光束；站定收益更高（升至 Lv ${nextLevel}/${upgradeCaps["branch-sigil-curtain"]}）`,
+      "branch-sigil-curtain": `本次：暗幕大激光 +1，影符命中折出大激光；站着不动收益更高（升至 Lv ${nextLevel}/${upgradeCaps["branch-sigil-curtain"]}）`,
       jade: `本次：玉简雷 +1，锁定雷刻伤害提高；本级方向会额外生效（升至 Lv ${nextLevel}/${upgradeCaps.jade}）`,
       needle: `本次：雨墨针 +1，细针雨伤害提高；本级方向会额外生效（升至 Lv ${nextLevel}/${upgradeCaps.needle}）`,
       fan: `本次：玉扇风 +1，弧风伤害提高；本级方向会额外生效（升至 Lv ${nextLevel}/${upgradeCaps.fan}）`,
       umbrella: `本次：墨莲伞 +1，护圈伤害和伞骨数量提高；本级方向会额外生效（升至 Lv ${nextLevel}/${upgradeCaps.umbrella}）`,
       "branch-jade-chain": `本次：玉简连弧 +1，雷刻命中后折出连锁玉弧（升至 Lv ${nextLevel}/${upgradeCaps["branch-jade-chain"]}）`,
-      "branch-jade-ward": `本次：玉简镇域 +1，雷刻落点展开方阵镇域；站定与寂光砚收益更高（升至 Lv ${nextLevel}/${upgradeCaps["branch-jade-ward"]}）`,
+      "branch-jade-ward": `本次：大雷区 +1，雷刻落点展开大雷区；站定大激光与小激光镜收益更高（升至 Lv ${nextLevel}/${upgradeCaps["branch-jade-ward"]}）`,
       "branch-needle-curtain": `本次：雨墨帘 +1，针雨命中追加纵向雨帘和目标间雨线（升至 Lv ${nextLevel}/${upgradeCaps["branch-needle-curtain"]}）`,
       "branch-needle-seal": `本次：定雨纹 +1，减速目标被针雨命中会展开范围雨纹（升至 Lv ${nextLevel}/${upgradeCaps["branch-needle-seal"]}）`,
       "branch-fan-gale": `本次：玉扇回廊 +1，扇风命中后展开回廊风纹；回风路线会多触发一次（升至 Lv ${nextLevel}/${upgradeCaps["branch-fan-gale"]}）`,
@@ -3864,7 +3864,7 @@
       "branch-crane-echo": `本次：纸鹤回羽 +1，纸鹤命中分裂回羽（升至 Lv ${nextLevel}/${upgradeCaps["branch-crane-echo"]}）`,
       stride: `本次：移速 +22，拾取范围 +18（升至 Lv ${nextLevel}/${upgradeCaps.stride}）`,
       heart: `本次：生命上限 +22，当前生命 +34（升至 Lv ${nextLevel}/${upgradeCaps.heart}）`,
-      focus: `本次：所有伤害 +16%；解锁/强化站定凝神收益，2 级后可射出凝神激光（升至 Lv ${nextLevel}/${upgradeCaps.focus}）`,
+      focus: `本次：所有伤害 +16%；站住不动会越打越快，2 级后可射出大激光（升至 Lv ${nextLevel}/${upgradeCaps.focus}）`,
       "ability-ink-mark": "本次：解锁墨印叠层，4 层爆开；星铃命中会回转墨锋",
       "ability-dew-pulse": "本次：解锁月露蓄能，满 8 点释放牵引伤害脉冲",
       "ability-ember": "本次：解锁月焰余烬，墨印爆发会二次点燃",
@@ -3877,7 +3877,7 @@
       "relic-lacquer-key": "本次：拾取范围 +22；宝箱奖励为引露脉冲充能",
       "relic-branch-inkstone": "本次：分支触发会回冷却，并为引露脉冲充能",
       "relic-chest-prism": "本次：宝箱奖励会折射已拥有分支，3/5 奖励触发更多",
-      "relic-focus-lens": "本次：站定更早发射凝神光束，并追加两道寂光侧束",
+      "relic-focus-lens": "本次：站定更早发射大激光，并追加两道小激光",
       "relic-tempo-bell": "本次：慢武器每次出手多一圈重响，补伤害、减速，并提前下一次出手",
       "evolve-void-brush": "本次：合成万象墨锋，并立刻放出一轮贯穿墨锋",
       "evolve-star-river": "本次：合成星河轮，并立刻爆出一圈碎星",
@@ -3910,13 +3910,13 @@
       "branch-lantern-vein": "流派：流萤/照影双核，命中少但回冷却与光束收益高",
       sigil: `流派：低频高收益${variant}，后续看裂月镜与照影回文`,
       "branch-sigil-echo": "流派：暗场爆发，触发少但收益高，吃分枝砚/宝箱棱镜",
-      "branch-sigil-curtain": "流派：站定折幕，低频触发换大范围光束和屏幕压迫感",
+      "branch-sigil-curtain": "流派：站定大激光，发动少但一次扫出大范围激光",
       jade: `流派：雷刻点杀${variant}，触发慢但目标清晰、反馈强`,
       needle: `流派：针雨点杀${variant}，触发慢但多目标落点很清楚`,
       fan: `流派：扇面控场${variant}，发动不快但一次能扫出大片安全区`,
       umbrella: `流派：近身反打${variant}，被围时用护圈和伞骨马上看见收益`,
       "branch-jade-chain": "流派：低频连锁点杀，敌人密集时一次决策能马上看见收益",
-      "branch-jade-ward": "流派：站定镇域，触发少但大范围减速和方阵压制很明显",
+      "branch-jade-ward": "流派：站定大雷区，发动少但大范围减速和压场很明显",
       "branch-needle-curtain": "流派：雨帘点杀，触发少但一次落下多条光雨，吃宝箱棱镜",
       "branch-needle-seal": "流派：减速定点，把霜弦/引露/站定转成范围雨纹收益",
       "branch-fan-gale": "流派：低频控场，挥一下留下风纹，回风和站定会明显放大收益",
@@ -3936,7 +3936,7 @@
       "relic-lacquer-key": "遗物：宝箱给引露充能，补足拾取/脉冲流",
       "relic-branch-inkstone": "遗物：所有分支触发都回冷却，分支越多越值",
       "relic-chest-prism": "遗物：宝箱折射分支，1/3/5 奖励放大构筑",
-      "relic-focus-lens": "遗物：站定阵地流核心，低频触发换高伤和强视觉反馈",
+      "relic-focus-lens": "遗物：小激光核心，站住不动会更快射大激光，并多射小激光",
       "relic-tempo-bell": "遗物：慢武器补偿核心，触发频率低就用更醒目的重响换收益",
       "evolve-void-brush": "超武：墨锋终点，选后马上发动；适合贯穿和墨印爆发",
       "evolve-star-river": "超武：星铃终点，选后马上发动；适合回旋和碎星",
@@ -3946,7 +3946,7 @@
       "evolve-jade-fan": "超武：玉扇风终点，选后马上发动；发动慢但一出手就改战场",
       stride: "通用：提高走位和拾取，利好归潮/聚辉/纸鹤",
       heart: "通用：容错提升，适合贴身和受伤反打",
-      focus: "通用：站定构筑核心；不选清辉入定就不会白送激光",
+      focus: "通用：站定玩法核心；不选站定大激光就不会白送激光",
     };
     return hints[id] || "流派：通用成长，补强当前构筑";
   }
@@ -4775,11 +4775,11 @@
       "archetype-dew": p.evolutions.rainLoom ? "拾取循环已很强；继续拿聚辉、织径、漆钥和宝箱奖励。" : p.lanternLevel < 5 ? "继续升流萤灯；飞得更勤更稳，每下更亮单次更痛。" : "找聚辉、织径、露砂漏或漆钥，把拾取变成伤害。",
       "archetype-frost": p.evolutions.frostZither ? "霜月琴已成型；继续拿封阵和裂音扩大控场。" : p.frostLevel < 4 ? "先把霜弦升高，长线控场和命中返利都能选。" : "找裂音、封阵和引露脉冲，准备霜月琴。",
       "archetype-sigil": p.sigilLevel < 3 ? "先把照影符升到 3 级；它慢，但每次命中收益要高。" : "找裂月镜、回文或折幕，低频出手要换大范围反馈。",
-      "archetype-jade": p.jadeLevel < 4 ? "继续升玉简雷；多目标更稳，重击减速单次回报更高。" : "找连弧、镇域、清辉入定或重响磬，让慢武器更值。",
+      "archetype-jade": p.jadeLevel < 4 ? "继续升玉简雷；多目标更稳，重击减速单次回报更高。" : "找连锁雷、大雷区、站定大激光或慢武器遗物，让慢武器更值。",
       "archetype-needle": p.evolutions.rainLoom ? "天雨织机已成型；继续拿雨墨帘和定雨纹放大雨线。" : p.needleLevel < 5 ? "继续升雨墨针；多落一针更稳，慢敌更痛适合减速流。" : "找引露脉冲和任意针雨分支，准备天雨织机。",
-      "archetype-fan": p.evolutions.jadeFan ? "清风玉阙已成型；继续拿回廊和裂羽扩大风墙。" : p.fanLevel < 5 ? "继续升玉扇风；宽扇控场，回风返场是慢触发高回报。" : "找玉扇回廊和清辉入定/引露脉冲，准备清风玉阙。",
+      "archetype-fan": p.evolutions.jadeFan ? "清风玉阙已成型；继续拿回廊和裂羽扩大风墙。" : p.fanLevel < 5 ? "继续升玉扇风；宽扇控场，回风返场是慢触发高回报。" : "找玉扇回廊和站定大激光/引露脉冲，准备清风玉阙。",
       "archetype-umbrella": p.umbrellaLevel < 4 ? "继续升墨莲伞；护圈保命，反刺让被围时马上反打。" : "找墨伞莲阵、伞影回潮或重响磬，把近身风险换成收益。",
-      "archetype-crane": p.abilities.craneVow ? "站定蓄纸鹤，移动时释放；配风步、回羽和寂光砚。" : "找纸鹤誓约或清辉入定，把站定变成可见爆发。",
+      "archetype-crane": p.abilities.craneVow ? "站定蓄纸鹤，移动时释放；配风步、回羽和小激光镜。" : "找纸鹤誓约或站定大激光，把站定变成可见爆发。",
     };
     return goals[archetype.id] || "继续拿和当前武器同方向的分支，优先选择能马上看见反馈的奖励。";
   }
@@ -4811,9 +4811,9 @@
     if (p.branches.lanternGleam) items.push({ id: "branch-lantern-gleam", type: "武器", name: "流萤聚辉", value: `Lv ${p.branches.lanternGleam}/${upgradeCaps["branch-lantern-gleam"]}`, desc: "拾取月露爆出萤辉" });
     if (p.branches.lanternVein) items.push({ id: "branch-lantern-vein", type: "武器", name: "流萤织径", value: `Lv ${p.branches.lanternVein}/${upgradeCaps["branch-lantern-vein"]}`, desc: "流萤命中织出萤径光束" });
     if (p.branches.sigilEcho) items.push({ id: "branch-sigil-echo", type: "武器", name: "照影回文", value: `Lv ${p.branches.sigilEcho}/${upgradeCaps["branch-sigil-echo"]}`, desc: "影符命中展开回照暗场" });
-    if (p.branches.sigilCurtain) items.push({ id: "branch-sigil-curtain", type: "武器", name: "照影折幕", value: `Lv ${p.branches.sigilCurtain}/${upgradeCaps["branch-sigil-curtain"]}`, desc: "影符命中折出暗幕光束" });
+    if (p.branches.sigilCurtain) items.push({ id: "branch-sigil-curtain", type: "武器", name: "暗幕大激光", value: `Lv ${p.branches.sigilCurtain}/${upgradeCaps["branch-sigil-curtain"]}`, desc: "影符命中折出大激光" });
     if (p.branches.jadeChain) items.push({ id: "branch-jade-chain", type: "武器", name: "玉简连弧", value: `Lv ${p.branches.jadeChain}/${upgradeCaps["branch-jade-chain"]}`, desc: "玉简雷命中折出连锁玉弧" });
-    if (p.branches.jadeWard) items.push({ id: "branch-jade-ward", type: "武器", name: "玉简镇域", value: `Lv ${p.branches.jadeWard}/${upgradeCaps["branch-jade-ward"]}`, desc: "雷刻落点展开方阵镇域" });
+    if (p.branches.jadeWard) items.push({ id: "branch-jade-ward", type: "武器", name: "大雷区", value: `Lv ${p.branches.jadeWard}/${upgradeCaps["branch-jade-ward"]}`, desc: "雷刻落点展开大雷区" });
     if (p.branches.needleCurtain) items.push({ id: "branch-needle-curtain", type: "武器", name: "雨墨帘", value: `Lv ${p.branches.needleCurtain}/${upgradeCaps["branch-needle-curtain"]}`, desc: "针雨命中追加纵向雨帘" });
     if (p.branches.needleSeal) items.push({ id: "branch-needle-seal", type: "武器", name: "定雨纹", value: `Lv ${p.branches.needleSeal}/${upgradeCaps["branch-needle-seal"]}`, desc: "针雨命中减速目标展开雨纹" });
     if (p.branches.fanGale) items.push({ id: "branch-fan-gale", type: "武器", name: "玉扇回廊", value: `Lv ${p.branches.fanGale}/${upgradeCaps["branch-fan-gale"]}`, desc: "扇风命中后展开回廊风纹" });
@@ -4841,7 +4841,7 @@
       ["relic-lacquer-key", p.relics.lacquerKey, "漆钥", "宝箱奖励为引露脉冲充能"],
       ["relic-branch-inkstone", p.relics.branchInkstone, "分枝砚", "分支触发回冷却并充能"],
       ["relic-chest-prism", p.relics.chestPrism, "匣纹棱镜", "宝箱奖励折射已拥有分支"],
-      ["relic-focus-lens", p.relics.focusLens, "寂光砚", "站定凝神追加侧光束"],
+      ["relic-focus-lens", p.relics.focusLens, "小激光镜", "站定追加小激光"],
       ["relic-route-charm", p.relics.routeCharm, "转向签", "选路线立刻回响并回出手间隔"],
       ["relic-tempo-bell", p.relics.tempoBell, "重响磬", "慢武器出手追加重响"],
     ];
@@ -4890,7 +4890,7 @@
         name: "玉简点杀",
         id: "archetype-jade",
         score: p.jadeLevel + p.mods.jadeFork * 2 + p.mods.jadeSeal * 2 + p.branches.jadeChain * 2 + p.branches.jadeWard * 3 + getPickCount("focus") + (p.relics.focusLens ? 3 : 0) + (p.relics.tempoBell ? 2 : 0),
-        desc: "核心：玉简雷、分雷/镇刻、玉简连弧/镇域、清辉入定、重响磬",
+        desc: "核心：玉简雷、分雷/大雷区、连锁雷、站定大激光、慢武器遗物",
       },
       {
         name: "针雨定点",
@@ -4908,13 +4908,13 @@
         name: "墨莲反打",
         id: "archetype-umbrella",
         score: p.umbrellaLevel + p.mods.umbrellaGuard * 2 + p.mods.umbrellaSpine * 2 + p.branches.umbrellaLotus * 3 + p.branches.umbrellaEcho * 3 + getPickCount("focus") + (p.relics.tempoBell ? 2 : 0),
-        desc: "核心：墨莲伞、护圈/反刺、墨伞莲阵/伞影回潮、站定凝神、重响磬",
+        desc: "核心：墨莲伞、护圈/反刺、墨伞莲阵/伞影回潮、站定大激光、慢武器遗物",
       },
       {
         name: "纸鹤蓄势",
         id: "archetype-crane",
         score: (p.abilities.craneVow ? 3 : 0) + p.branches.craneEcho * 2 + Math.max(0, Math.floor((p.speed - 190) / 28)) + (p.evolutions.voidBrush ? 1 : 0) + (p.relics.focusLens ? 2 : 0),
-        desc: "核心：纸鹤誓约、风步、回羽、静止凝神、寂光砚",
+        desc: "核心：纸鹤誓约、风步、回羽、站定大激光、小激光镜",
       },
     ].sort((a, b) => b.score - a.score);
     return scores[0];
@@ -4947,7 +4947,7 @@
     const directionScore = Object.values(p.mods).reduce((sum, value) => sum + value, 0);
     if (directionScore) traits.push({ id: "focus", type: "能力", name: "构筑方向", value: `已选 ${directionScore}`, desc: "每次武器升级都可二选一改变方向" });
     if (game.lastVariant) traits.push({ id: "route-last", type: "流派", name: "刚选路线", value: game.lastVariant.replace("：", " · "), desc: "这次路线选择已生效；以后再升级同一武器仍可改另一边。" });
-    if (getPickCount("focus") > 0 && p.focusStillness > 0.55) traits.push({ id: "focus", type: "能力", name: "静止凝神", value: getPickCount("focus") >= 2 && p.focusStillness > 1.05 ? "激光" : "攻速+", desc: "清辉入定后，站定换取攻速和额外光束" });
+    if (getPickCount("focus") > 0 && p.focusStillness > 0.55) traits.push({ id: "focus", type: "能力", name: "站定大激光", value: getPickCount("focus") >= 2 && p.focusStillness > 1.05 ? "大激光" : "攻速+", desc: "站着不动换攻速和额外激光" });
     for (const pick of game.picks.filter((item) => ["身法", "生存"].includes(item.type))) {
       traits.push({ ...pick, value: `Lv ${pick.count}/${upgradeCaps[pick.id] || "∞"}` });
     }

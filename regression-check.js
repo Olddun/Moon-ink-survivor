@@ -534,7 +534,7 @@ async function main() {
       const { player, game } = debug;
       player.relics.focusLens = false;
       game.picks = game.picks.filter((pick) => pick.id !== "focus");
-      game.picks.push({ id: "focus", type: "身法", name: "清辉入定", desc: "站定凝神。", count: 1 });
+      game.picks.push({ id: "focus", type: "身法", name: "站定大激光", desc: "站着不动换攻速和激光。", count: 1 });
       const applied = debug.applyUpgradeById("relic-focus-lens");
       const beforeBeams = game.beams.length;
       const beforeBlooms = game.blooms.length;
@@ -666,7 +666,7 @@ async function main() {
       game.picks.push(
         { id: "stride", type: "身法", name: "风步", desc: "移动速度提升，拾取范围扩大。", count: 4 },
         { id: "heart", type: "生存", name: "朱砂护心", desc: "生命上限与当下生命一起提升。", count: 4 },
-        { id: "focus", type: "身法", name: "清辉入定", desc: "所有伤害小幅提升。", count: 5 },
+        { id: "focus", type: "身法", name: "站定大激光", desc: "所有伤害小幅提升。", count: 5 },
       );
       debug.showUpgradeById("branch-brush-splinter");
     });
@@ -2604,7 +2604,7 @@ async function main() {
     desktop.focusLensEffect.triggered &&
     desktop.focusLensEffect.beams >= 3 &&
     desktop.focusLensEffect.bloom &&
-    desktop.focusLensEffect.panel.includes("寂光砚") &&
+    desktop.focusLensEffect.panel.includes("小激光镜") &&
     desktop.codexOpen.visible &&
     desktop.codexOpen.summary.includes("武器层级") &&
     desktop.codexOpen.summary.includes("超武/宝箱") &&
@@ -2630,7 +2630,7 @@ async function main() {
     desktop.codexOpen.text.includes("霜弦拨月") &&
     desktop.codexOpen.text.includes("墨锋骤雨") &&
     desktop.codexOpen.text.includes("霜弦封阵") &&
-    desktop.codexOpen.text.includes("照影折幕") &&
+    desktop.codexOpen.text.includes("暗幕大激光") &&
     desktop.codexOpen.text.includes("霜月琴") &&
     desktop.codexOpen.text.includes("清风玉阙") &&
     desktop.codexOpen.text.includes("玉扇裂羽") &&
@@ -2738,13 +2738,13 @@ async function main() {
     desktop.lanternVeinEffect.panel.includes("流萤织径") &&
     desktop.sigilCurtainOption.exists &&
     desktop.sigilCurtainOption.type === "武器" &&
-    desktop.sigilCurtainOption.text.includes("照影折幕") &&
+    desktop.sigilCurtainOption.text.includes("暗幕大激光") &&
     desktop.sigilCurtainEffect.level >= 1 &&
     desktop.sigilCurtainEffect.triggered &&
     desktop.sigilCurtainEffect.beams >= 4 &&
     desktop.sigilCurtainEffect.bloom &&
     desktop.sigilCurtainEffect.damaged &&
-    desktop.sigilCurtainEffect.panel.includes("照影折幕") &&
+    desktop.sigilCurtainEffect.panel.includes("暗幕大激光") &&
     desktop.jadeChainOption.exists &&
     desktop.jadeChainOption.type === "武器" &&
     desktop.jadeChainOption.text.includes("玉简连弧") &&
@@ -2756,7 +2756,7 @@ async function main() {
     desktop.jadeChainEffect.panel.includes("玉简连弧") &&
     desktop.jadeWardOption.exists &&
     desktop.jadeWardOption.type === "武器" &&
-    desktop.jadeWardOption.text.includes("玉简镇域") &&
+    desktop.jadeWardOption.text.includes("大雷区") &&
     desktop.jadeWardEffect.level >= 1 &&
     desktop.jadeWardEffect.triggered &&
     desktop.jadeWardEffect.beams >= 5 &&
@@ -2765,7 +2765,7 @@ async function main() {
     desktop.jadeWardEffect.damaged &&
     desktop.jadeWardEffect.slowed &&
     desktop.jadeWardEffect.dewCharged &&
-    desktop.jadeWardEffect.panel.includes("玉简镇域") &&
+    desktop.jadeWardEffect.panel.includes("大雷区") &&
     desktop.needleOption.exists &&
     desktop.needleOption.type === "武器" &&
     desktop.needleOption.text.includes("雨墨针") &&
@@ -3049,7 +3049,7 @@ async function main() {
   note("run goal", desktop.buildPanelsInitial.goalText.includes("盼头") && /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) && /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText));
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text));
   note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));
-  note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.routeSummaries >= 10 && desktop.codexOpen.routeSummaryText.includes("下次可改选") && desktop.codexOpen.routeSummaryText.includes("路线：") && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
+  note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.routeSummaries >= 10 && desktop.codexOpen.routeSummaryText.includes("下次可改选") && desktop.codexOpen.routeSummaryText.includes("路线：") && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("暗幕大激光") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
   note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && desktop.codexTree.text.includes("路线1") && desktop.codexTree.text.includes("不会被上次路线锁住") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
   note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("Lv") && ["墨锋", "流萤灯", "星铃", "月焰", "霜弦", "照影符", "玉简雷", "雨墨针", "玉扇风", "墨莲伞"].some((name) => desktop.after.weaponPanel.includes(name)) && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");
   note("umbrella lotus", desktop.umbrellaLotusOption.exists && desktop.umbrellaLotusOption.type === "武器" && desktop.umbrellaLotusOption.text.includes("墨伞莲阵") && desktop.umbrellaLotusOption.effect.includes("短暂阵地") && desktop.umbrellaLotusEffect.level >= 1 && desktop.umbrellaLotusEffect.triggered && desktop.umbrellaLotusEffect.beams >= 5 && desktop.umbrellaLotusEffect.bloom && desktop.umbrellaLotusEffect.inkstoneBloom && desktop.umbrellaLotusEffect.trail && desktop.umbrellaLotusEffect.damaged && desktop.umbrellaLotusEffect.slowed && desktop.umbrellaLotusEffect.dewCharged && desktop.umbrellaLotusEffect.cooldownReduced && desktop.umbrellaLotusEffect.panel.includes("墨伞莲阵"));
