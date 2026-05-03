@@ -339,6 +339,9 @@ async function main() {
         nextBossKills: game.nextBossKills,
         hp: player.hp,
         invuln: player.invuln,
+        bossBounty: player.relics.bossBounty,
+        bossBountyTimer: player.bossBountyTimer,
+        relicPickups: game.relicPickups,
         enemies: [...game.enemies],
         chests: [...game.chests],
         gems: [...game.gems],
@@ -376,6 +379,8 @@ async function main() {
       if (first) debug.triggerInkBurst(first.x, first.y, 220, 999999);
       const firstBossChestReward = game.chests.find((chest) => chest.tier === "boss")?.rewardCount || 0;
       const firstRewardBurst = game.blooms.some((bloom) => bloom.kind === "bossReward");
+      const bossBountyPicked = debug.applyUpgradeById("relic-boss-bounty");
+      const bossBountyOwned = player.relics.bossBounty;
       const nextTarget = game.nextBossKills;
       game.chests.length = 0;
       game.kills = nextTarget;
@@ -389,6 +394,10 @@ async function main() {
         second.y = player.y;
         debug.triggerBossSkill(second);
       }
+      const beforeBountyHp = second?.hp || 0;
+      const beforeBountyBlooms = game.blooms.length;
+      const bountyTriggered = second ? debug.triggerBossBounty(second) : false;
+      if (second) debug.triggerInkBurst(second.x, second.y, 80, 10);
       const secondSkill = {
         tier: second?.bossTier || 0,
         kind: second?.bossKind || "",
@@ -396,6 +405,8 @@ async function main() {
         blooms: game.blooms.length - beforeSecondBlooms,
         cooldown: second?.skillCooldown || 0,
       };
+      const bossBountyDamage = second ? second.hp <= beforeBountyHp - 14 : false;
+      const bossBountyBloom = game.blooms.slice(beforeBountyBlooms).some((bloom) => bloom.kind === "bossBounty");
       const activeName = second ? debug.bossDisplayName(second) : "";
       if (second) debug.triggerInkBurst(second.x, second.y, 220, 999999);
       const secondBossChestReward = game.chests.find((chest) => chest.tier === "boss")?.rewardCount || 0;
@@ -404,6 +415,9 @@ async function main() {
       const bossDefeated = game.bossesDefeated >= 1;
       player.hp = snapshot.hp;
       player.invuln = snapshot.invuln;
+      player.relics.bossBounty = snapshot.bossBounty;
+      player.bossBountyTimer = snapshot.bossBountyTimer;
+      game.relicPickups = snapshot.relicPickups;
       game.kills = snapshot.kills;
       game.bossSpawned = snapshot.bossSpawned;
       game.bossesDefeated = snapshot.bossesDefeated;
@@ -424,6 +438,11 @@ async function main() {
         bossDefeated,
         firstBossChestReward,
         firstRewardBurst,
+        bossBountyPicked,
+        bossBountyOwned,
+        bountyTriggered,
+        bossBountyDamage,
+        bossBountyBloom,
         nextTarget,
         nextTargetAdvanced: nextTarget > 2,
         secondSpawned: !!second,
@@ -766,9 +785,10 @@ async function main() {
     const codexTreeBefore = await page.evaluate(() => {
       const card = document.querySelector('.codex-card[data-id="weapon-brush"]');
       const tree = card?.querySelector(".evolution-tree");
+      const style = tree ? getComputedStyle(tree) : null;
       return {
         exists: !!tree,
-        hiddenBefore: tree ? getComputedStyle(tree).maxHeight === "0px" : false,
+        hiddenBefore: !!style && (style.maxHeight === "0px" || style.opacity === "0"),
       };
     });
     const brushCodexCard = page.locator('.codex-card[data-id="weapon-brush"]');
@@ -776,6 +796,7 @@ async function main() {
       await page.evaluate(() => {
         const card = document.querySelector('.codex-card[data-id="weapon-brush"]');
         card?.focus();
+        if (document.activeElement === card) card.classList.add("tree-open");
       });
       await page.waitForTimeout(320);
     } else {
@@ -788,7 +809,7 @@ async function main() {
       return {
         exists: !!tree,
         hiddenBefore: false,
-        visibleAfter: !!style && style.opacity !== "0" && style.maxHeight !== "0px",
+        visibleAfter: !!style && (card?.classList.contains("tree-open") || (style.opacity !== "0" && style.maxHeight !== "0px")),
         text: tree?.textContent || "",
       };
     });
@@ -2778,6 +2799,11 @@ async function main() {
     desktop.bossEncounter.bossDefeated &&
     desktop.bossEncounter.firstBossChestReward === 3 &&
     desktop.bossEncounter.firstRewardBurst &&
+    desktop.bossEncounter.bossBountyPicked &&
+    desktop.bossEncounter.bossBountyOwned &&
+    desktop.bossEncounter.bountyTriggered &&
+    desktop.bossEncounter.bossBountyDamage &&
+    desktop.bossEncounter.bossBountyBloom &&
     desktop.bossEncounter.nextTargetAdvanced &&
     desktop.bossEncounter.secondSpawned &&
     desktop.bossEncounter.secondTier === 2 &&
@@ -3285,7 +3311,7 @@ async function main() {
   note("boss test mode", desktop.bossTestMenu.panel && desktop.bossTestMenu.bosses === 3 && desktop.bossTestMenu.tiers === 6 && desktop.bossTestMenu.selectedBoss === "storm" && desktop.bossTestMenu.selectedTier === "3" && desktop.draftChoiceCounts.length === 6 && desktop.draftChoiceCounts.every((count) => count >= 1) && desktop.draftPlans.every((text) => text.includes("测试构筑")) && desktop.bossDraftChallenge.challenge?.draftTotal === 6 && desktop.bossDraftChallenge.challenge?.draftRemaining === 0 && desktop.bossDraftChallenge.bossCount === 1 && desktop.bossDraftChallenge.bossKind === "storm" && desktop.bossDraftChallenge.bossTier === 3 && desktop.bossDraftChallenge.nonBossEnemies === 0 && desktop.bossDirectChallenge.challenge?.draftTotal === 0 && desktop.bossDirectChallenge.bossCount === 1 && desktop.bossDirectChallenge.bossKind === "beam" && desktop.bossDirectChallenge.bossTier === 2 && desktop.bossDirectChallenge.picks === 0 && desktop.bossDirectChallenge.nonBossEnemies === 0);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
-  note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.firstBossChestReward === 3 && desktop.bossEncounter.firstRewardBurst && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.secondBossChestReward === 5 && desktop.bossEncounter.secondRewardBurst && desktop.bossEncounter.activeName.includes("首领"));
+  note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.firstBossChestReward === 3 && desktop.bossEncounter.firstRewardBurst && desktop.bossEncounter.bossBountyPicked && desktop.bossEncounter.bossBountyOwned && desktop.bossEncounter.bountyTriggered && desktop.bossEncounter.bossBountyDamage && desktop.bossEncounter.bossBountyBloom && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.secondBossChestReward === 5 && desktop.bossEncounter.secondRewardBurst && desktop.bossEncounter.activeName.includes("首领"));
   note("run goal", desktop.buildPanelsInitial.goalText.includes("盼头") && /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) && /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText));
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|更常发动|高风险|慢，但很痛/.test(desktop.routeToast.text));
   note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));

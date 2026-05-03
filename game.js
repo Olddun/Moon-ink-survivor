@@ -288,6 +288,7 @@
     "relic-chest-prism": 1,
     "relic-focus-lens": 1,
     "relic-tempo-bell": 1,
+    "relic-boss-bounty": 1,
     "evolve-void-brush": 1,
     "evolve-star-river": 1,
     "evolve-moon-lotus": 1,
@@ -855,6 +856,19 @@
       available: (p) => !p.relics.tempoBell && slowWeaponLevel(p) >= 4,
       apply: (p) => {
         p.relics.tempoBell = true;
+        game.relicPickups += 1;
+      },
+    },
+    {
+      id: "relic-boss-bounty",
+      type: "遗物",
+      name: "首领赏金",
+      desc: "打过 Boss 后出现。打 Boss 更痛；偶尔在 Boss 身上炸出赏金光圈，击破后回血。",
+      once: true,
+      available: (p) => !p.relics.bossBounty && (game.bossesDefeated > 0 || game.enemies.some((enemy) => enemy.type === "boss")),
+      apply: (p) => {
+        p.relics.bossBounty = true;
+        p.bossBountyTimer = 0;
         game.relicPickups += 1;
       },
     },
@@ -1670,6 +1684,7 @@
         { id: "relic-focus-lens", type: "遗物", name: "小激光镜", desc: "站定时更早射大激光，并追加两道小激光。条件：站定大激光或纸鹤。", state: (p) => (p.relics.focusLens ? "已获得" : getPickCount("focus") > 0 || p.abilities.craneVow ? "可出现" : "需站定大激光/纸鹤"), owned: (p) => p.relics.focusLens, ready: (p) => !p.relics.focusLens && (getPickCount("focus") > 0 || p.abilities.craneVow), tree: (p) => [{ text: "条件：站定大激光或纸鹤", status: getPickCount("focus") > 0 || p.abilities.craneVow ? "ready" : "locked" }, { text: "站定 1 秒后可提前射出大激光", status: p.relics.focusLens ? "owned" : "ready" }, { text: "追加两道小激光 + 更强震屏", status: p.relics.focusLens ? "owned" : "locked" }, { text: "联动：暗幕大激光/冰圈阵地玩法", status: p.branches.sigilCurtain || p.branches.frostLattice ? "ready" : "locked" }] },
         { id: "relic-route-charm", type: "遗物", name: "转向签", desc: "选路线也会有即时回响。选过 2 次武器路线后出现。", state: (p) => (p.relics.routeCharm ? "已获得" : Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2 ? "可出现" : "需选 2 次路线"), owned: (p) => p.relics.routeCharm, ready: (p) => !p.relics.routeCharm && Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2, tree: (p) => [{ text: "条件：选过 2 次武器路线", status: Object.values(p.mods).reduce((sum, value) => sum + value, 0) >= 2 ? "ready" : "locked" }, { text: "触发：以后每次选择路线", status: p.relics.routeCharm ? "owned" : "ready" }, { text: "收益：立刻回一点武器出手间隔", status: p.relics.routeCharm ? "owned" : "locked" }, { text: "联动：引露脉冲充能 + 选路回响特效", status: p.abilities.dewPulse ? "ready" : "locked" }] },
         { id: "relic-tempo-bell", type: "遗物", name: "重响磬", desc: "慢武器每次出手多一圈重响，补伤害、减速并提前下一次出手。", state: (p) => (p.relics.tempoBell ? "已获得" : slowWeaponLevel(p) >= 4 ? "可出现" : `${slowWeaponLevel(p)}/4 慢武器等级`), owned: (p) => p.relics.tempoBell, ready: (p) => !p.relics.tempoBell && slowWeaponLevel(p) >= 4, tree: (p) => [{ text: `慢武器合计 ${slowWeaponLevel(p)}/4`, status: slowWeaponLevel(p) >= 4 ? "ready" : "locked" }, { text: "怎么发动：月焰、照影符、玉简雷、雨墨针、玉扇风、墨莲伞出手", status: p.relics.tempoBell ? "owned" : "ready" }, { text: "好处：多一圈重响，伤害和减速马上可见", status: p.relics.tempoBell ? "owned" : "locked" }, { text: "配合：慢触发路线、站定阵地、引露脉冲", status: p.abilities.dewPulse || getPickCount("focus") > 0 ? "ready" : "locked" }] },
+        { id: "relic-boss-bounty", type: "遗物", name: "首领赏金", desc: "打过 Boss 后出现。打 Boss 更痛，偶尔炸出赏金光圈，击破后回血。", state: (p) => (p.relics.bossBounty ? "已获得" : game.bossesDefeated > 0 || game.enemies.some((enemy) => enemy.type === "boss") ? "可出现" : "需先遇到 Boss"), owned: (p) => p.relics.bossBounty, ready: (p) => !p.relics.bossBounty && (game.bossesDefeated > 0 || game.enemies.some((enemy) => enemy.type === "boss")), tree: (p) => [{ text: "需要：先遇到或击破 Boss", status: game.bossesDefeated > 0 || game.enemies.some((enemy) => enemy.type === "boss") ? "ready" : "locked" }, { text: "怎么发动：所有攻击打 Boss", status: p.relics.bossBounty ? "owned" : "ready" }, { text: "好处：Boss 受伤更多，偶尔炸出赏金光圈", status: p.relics.bossBounty ? "owned" : "locked" }, { text: "击破 Boss：立刻回血，并更稳地去开大宝箱", status: p.relics.bossBounty ? "owned" : "ready" }] },
       ],
     },
     {
@@ -1807,6 +1822,7 @@
         focusLens: false,
         routeCharm: false,
         tempoBell: false,
+        bossBounty: false,
       },
       evolutions: {
         voidBrush: false,
@@ -1842,6 +1858,7 @@
       dewCharge: 0,
       dewThreshold: 8,
       orbSurge: 0,
+      bossBountyTimer: 0,
       redSealReady: false,
       stillness: 0,
       craneCharges: 0,
@@ -2957,6 +2974,10 @@
   }
 
   function dealDamage(enemy, amount, knock = 0, from = game.player, source = "raw") {
+    if (game.player.relics.bossBounty && enemy.type === "boss" && source !== "bossBounty") {
+      amount *= 1.45;
+      triggerBossBounty(enemy);
+    }
     enemy.hp -= amount;
     enemy.hit = 0.12;
     if (game.player.abilities.inkMark && source !== "mark") {
@@ -2973,6 +2994,25 @@
     }
     if (game.enemies.includes(enemy)) updateCharacterHitTrait(source, enemy);
     if (game.enemies.includes(enemy) && enemy.hp <= 0) killEnemy(enemy);
+  }
+
+  function triggerBossBounty(enemy) {
+    const p = game.player;
+    if (!p?.relics.bossBounty || !enemy || enemy.type !== "boss" || (p.bossBountyTimer || 0) > 0) return false;
+    p.bossBountyTimer = 1.35;
+    const radius = 112 + Math.min(54, (enemy.bossTier || 1) * 12);
+    game.blooms.push({ x: enemy.x, y: enemy.y, r: 14, max: radius, life: 0.42, color: palette.gold, kind: "bossBounty", bossKind: enemy.bossKind });
+    game.beams.push({ x1: enemy.x - radius * 0.42, y1: enemy.y, x2: enemy.x + radius * 0.42, y2: enemy.y, life: 0.2, maxLife: 0.2, width: 5.4, color: palette.gold });
+    game.beams.push({ x1: enemy.x, y1: enemy.y - radius * 0.42, x2: enemy.x, y2: enemy.y + radius * 0.42, life: 0.2, maxLife: 0.2, width: 5.4, color: palette.gold });
+    spawnParticles(enemy.x, enemy.y, palette.gold, 22);
+    for (const other of [...game.enemies]) {
+      if (other === enemy || other.type === "boss") continue;
+      if (Math.hypot(other.x - enemy.x, other.y - enemy.y) < radius + other.r) {
+        dealDamage(other, (12 + p.level * 0.8 + (enemy.bossTier || 1) * 2) * p.damageMult, 7, enemy, "bossBounty");
+      }
+    }
+    shake = Math.max(shake, 4.8);
+    return true;
   }
 
   function traitSourceGroup(source) {
@@ -3782,6 +3822,11 @@
       game.bossesDefeated += 1;
       game.nextBossKills = game.kills + 28 + game.bossesDefeated * 16;
       game.eliteTimer = 8;
+      if (p.relics.bossBounty) {
+        p.hp = Math.min(p.maxHp, p.hp + 24 + (enemy.bossTier || 1) * 6);
+        game.blooms.push({ x: p.x, y: p.y, r: 10, max: 108, life: 0.46, color: palette.gold, kind: "bossBounty", bossKind: enemy.bossKind });
+        spawnParticles(p.x, p.y, palette.gold, 24);
+      }
       game.blooms.push({ x: enemy.x, y: enemy.y, r: 18, max: 150 + (enemy.bossTier || 1) * 18, life: 0.74, color: enemy.bossTier >= 2 ? palette.gold : palette.lilac, kind: "bossReward", bossKind: enemy.bossKind });
       shake = Math.max(shake, enemy.bossTier >= 2 ? 12 : 8);
     }
@@ -3987,6 +4032,7 @@
     if (id === "relic-focus-lens") return p.relics.focusLens ? 1 : 0;
     if (id === "relic-route-charm") return p.relics.routeCharm ? 1 : 0;
     if (id === "relic-tempo-bell") return p.relics.tempoBell ? 1 : 0;
+    if (id === "relic-boss-bounty") return p.relics.bossBounty ? 1 : 0;
     if (id === "evolve-void-brush") return p.evolutions.voidBrush ? 1 : 0;
     if (id === "evolve-star-river") return p.evolutions.starRiver ? 1 : 0;
     if (id === "evolve-moon-lotus") return p.evolutions.moonLotus ? 1 : 0;
@@ -4058,6 +4104,7 @@
       "relic-chest-prism": "本次：宝箱奖励会折射已拥有分支，3/5 奖励触发更多",
       "relic-focus-lens": "本次：站定更早发射大激光，并追加两道小激光",
       "relic-tempo-bell": "本次：慢武器每次出手多一圈重响，补伤害、减速，并提前下一次出手",
+      "relic-boss-bounty": "本次：打 Boss 更痛；偶尔炸出赏金光圈，击破后回血",
       "evolve-void-brush": "本次：合成万象墨锋，并立刻放出一轮贯穿墨锋",
       "evolve-star-river": "本次：合成星河轮，并立刻爆出一圈碎星",
       "evolve-moon-lotus": "本次：合成白月焰莲，并立刻引爆一次双重焰莲",
@@ -4121,6 +4168,7 @@
       "relic-focus-lens": "本次：站定更早射大激光，并多射小激光",
       "relic-route-charm": "本次：以后选路线会立刻爆一圈",
       "relic-tempo-bell": "本次：慢武器出手时多一圈重响",
+      "relic-boss-bounty": "本次：打 Boss 更痛，击破回血",
       "evolve-void-brush": "本次：合成超飞刃，立刻清一轮",
       "evolve-star-river": "本次：合成双层转圈铃，立刻爆一圈",
       "evolve-moon-lotus": "本次：合成大火莲，立刻双重爆燃",
@@ -4187,6 +4235,7 @@
       "relic-focus-lens": "小激光镜",
       "relic-route-charm": "路线回响",
       "relic-tempo-bell": "慢武器重响",
+      "relic-boss-bounty": "打 Boss 更痛",
       "evolve-void-brush": "超飞刃",
       "evolve-star-river": "超转圈铃",
       "evolve-moon-lotus": "超火莲",
@@ -4246,6 +4295,7 @@
       "relic-chest-prism": "遗物：宝箱折射分支，1/3/5 奖励放大构筑",
       "relic-focus-lens": "遗物：小激光核心，站住不动会更快射大激光，并多射小激光",
       "relic-tempo-bell": "遗物：慢武器补偿核心，触发频率低就用更醒目的重响换收益",
+      "relic-boss-bounty": "遗物：首领战专用，低频 Boss 换更高伤害、赏金光圈和击破回血",
       "evolve-void-brush": "超武：墨锋终点，选后马上发动；适合贯穿和墨印爆发",
       "evolve-star-river": "超武：星铃终点，选后马上发动；适合回旋和碎星",
       "evolve-moon-lotus": "超武：月焰终点，选后马上发动；适合范围爆发和击杀链",
@@ -4289,6 +4339,7 @@
       .replace(/分枝砚/g, "分支加速")
       .replace(/宝箱棱镜/g, "宝箱触发分支")
       .replace(/重响磬/g, "慢武器重响")
+      .replace(/首领赏金/g, "打 Boss 更痛")
       .replace(/照影回文/g, "暗场爆发")
       .replace(/暗幕大激光/g, "大激光");
   }
@@ -4643,6 +4694,7 @@
     p.invuln = Math.max(0, p.invuln - dt);
     p.characterTraitCooldown = Math.max(0, (p.characterTraitCooldown || 0) - dt);
     p.orbSurge = Math.max(0, p.orbSurge - dt);
+    p.bossBountyTimer = Math.max(0, (p.bossBountyTimer || 0) - dt);
     p.orbAngle += dt * (2.2 + p.orbs * 0.08 + (p.orbSurge > 0 ? 1.4 : 0));
     p.brushTimer -= dt;
     p.flameTimer -= dt;
@@ -5382,6 +5434,7 @@
       ["relic-focus-lens", p.relics.focusLens, "小激光镜", "站定追加小激光"],
       ["relic-route-charm", p.relics.routeCharm, "转向签", "选路线立刻回响并回出手间隔"],
       ["relic-tempo-bell", p.relics.tempoBell, "重响磬", "慢武器出手追加重响"],
+      ["relic-boss-bounty", p.relics.bossBounty, "首领赏金", "打 Boss 更痛，击破回血"],
     ];
     return relics.filter(([, owned]) => owned).map(([id, , name, desc]) => ({ id, type: "遗物", name, value: "Lv 1/1", desc }));
   }
@@ -6533,7 +6586,7 @@
       }
       ctx.restore();
     }
-    if (bloom.kind === "bossSpawn" || bloom.kind === "bossWarn" || bloom.kind === "bossRing" || bloom.kind === "bossBeam" || bloom.kind === "bossStorm" || bloom.kind === "bossReward") {
+    if (bloom.kind === "bossSpawn" || bloom.kind === "bossWarn" || bloom.kind === "bossRing" || bloom.kind === "bossBeam" || bloom.kind === "bossStorm" || bloom.kind === "bossReward" || bloom.kind === "bossBounty") {
       ctx.save();
       ctx.translate(bloom.x, bloom.y);
       const bossKind = bloom.bossKind || (bloom.kind === "bossStorm" ? "storm" : bloom.kind === "bossBeam" ? "beam" : "ring");
@@ -6561,6 +6614,13 @@
       } else {
         ctx.beginPath();
         ctx.arc(0, 0, r * 0.58, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      if (bloom.kind === "bossBounty") {
+        ctx.strokeStyle = palette.white;
+        ctx.globalAlpha *= 0.65;
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.33, 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.restore();
@@ -7367,6 +7427,7 @@
     triggerUmbrellaEcho,
     triggerStandingLaser,
     triggerBossSkill,
+    triggerBossBounty,
     maybeSpawnBoss,
     spawnEnemy,
     bossDisplayName,
