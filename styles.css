@@ -219,7 +219,44 @@ canvas {
   border-color: rgba(215, 90, 74, 0.34);
 }
 
+.run-goal {
+  position: absolute;
+  left: 50%;
+  top: 92px;
+  z-index: 4;
+  display: grid;
+  width: min(340px, calc(100vw - 420px));
+  min-width: 260px;
+  gap: 4px;
+  padding: 10px 13px;
+  border: 1px solid rgba(31, 38, 48, 0.12);
+  border-left: 5px solid rgba(201, 154, 46, 0.68);
+  border-radius: 8px;
+  background: rgba(255, 249, 237, 0.74);
+  box-shadow: 0 14px 42px rgba(31, 38, 48, 0.1);
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.run-goal b {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.run-goal span {
+  color: #55585f;
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.38;
+}
+
 body[data-game-state="menu"] .build-panel {
+  display: none;
+}
+
+body[data-game-state="menu"] .run-goal {
   display: none;
 }
 
@@ -726,6 +763,21 @@ body[data-game-state="menu"] .route-toast {
   color: #4c4e52;
   font-size: 17px;
   line-height: 1.75;
+}
+
+.title-lockup p span {
+  display: block;
+}
+
+.title-lockup p span + span {
+  margin-top: 8px;
+}
+
+.title-lockup p b {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--ink);
+  font-weight: 950;
 }
 
 .character-select {
@@ -3014,6 +3066,17 @@ body[data-game-state="menu"] .route-toast {
   .build-relics {
     left: 10px;
     bottom: 58px;
+  }
+
+  .run-goal {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 102px;
+    width: auto;
+    min-width: 0;
+    padding: 8px 10px;
+    transform: none;
   }
 
   .build-chip {

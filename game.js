@@ -34,6 +34,7 @@
     weaponBuildPanel: document.getElementById("weaponBuildPanel"),
     relicBuildPanel: document.getElementById("relicBuildPanel"),
     traitBuildPanel: document.getElementById("traitBuildPanel"),
+    runGoal: document.getElementById("runGoal"),
     routeToast: document.getElementById("routeToast"),
     runSubtitle: document.getElementById("runSubtitle"),
     healthBar: document.getElementById("healthBar"),
@@ -1958,9 +1959,30 @@
   function showGameOver() {
     state = "gameover";
     playPageTransition(() => {
-      ui.gameOverStats.textContent = `${game.player.characterName}坚持 ${formatTime(game.time)}，击破 ${game.kills} 个夜影，抵达等级 ${game.player.level}；能力 ${game.abilityPickups}，遗物 ${game.relicPickups}，超武 ${game.evolutionPickups}，宝箱 ${game.chestsOpened}。`;
+      ui.gameOverStats.innerHTML = buildGameOverRecap();
       ui.gameOver.classList.add("visible");
     });
+  }
+
+  function buildGameOverRecap() {
+    const p = game.player;
+    const archetype = getBuildArchetype(p);
+    const next = nextEvolutionHint(p);
+    const lastRoute = game.lastVariant ? `刚才改过 ${game.lastVariant.replace("：", " · ")}` : "这把还没明确改过武器路线";
+    const base = `${p.characterName}坚持 ${formatTime(game.time)}，击破 ${game.kills} 个夜影，抵达等级 ${p.level}；能力 ${game.abilityPickups}，遗物 ${game.relicPickups}，超武 ${game.evolutionPickups}，宝箱 ${game.chestsOpened}。`;
+    const suggestion = nextRunSuggestion(p, archetype);
+    return `<span>${escapeHtml(base)}</span><span><b>这把故事</b>${escapeHtml(archetype.name)}成型度最高；${escapeHtml(lastRoute)}。</span><span><b>差一点</b>${escapeHtml(next.text)}</span><span><b>下把可试</b>${escapeHtml(suggestion)}</span>`;
+  }
+
+  function nextRunSuggestion(p, archetype) {
+    if (game.evolutionPickups <= 0) return `继续追 ${archetype.name}，先凑一个超武，让中期出现第一次质变。`;
+    if (game.chestsOpened <= 0) return "多追精英和月匣奖励，宝箱遗物能把已有路线放大。";
+    if (Object.values(p.mods).reduce((sum, value) => sum + value, 0) < 3) return "多选同一武器的两条路线对比，找一条你能肉眼看见收益的打法。";
+    return `可以换角色试另一套开局，比如从 ${archetype.name} 转向站定、拾取或低频爆发路线。`;
+  }
+
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
   }
 
   function formatTime(sec) {
@@ -4654,6 +4676,7 @@
     ui.killText.textContent = game.kills;
     ui.buildText.textContent = `${game.abilityPickups}/${game.relicPickups}/${game.evolutionPickups}`;
     ui.runSubtitle.textContent = `第 ${game.wave} 潮`;
+    renderRunGoal(p);
     ui.healthBar.style.width = `${hpPercent}%`;
     ui.healthText.textContent = `生命 ${hpNow} / ${hpMax} · ${Math.round(hpPercent)}%`;
     ui.healthBar.parentElement.dataset.healthState = hpPercent <= 30 ? "danger" : hpPercent <= 55 ? "wound" : "steady";
@@ -4661,6 +4684,49 @@
     ui.healthBar.parentElement.setAttribute("aria-valuenow", hpNow);
     ui.xpBar.style.width = `${clamp((p.xp / p.nextXp) * 100, 0, 100)}%`;
     renderBuildPanels();
+  }
+
+  function renderRunGoal(p) {
+    if (!ui.runGoal) return;
+    const stage = runStageLabel(p);
+    const next = nextRunGoal(p);
+    ui.runGoal.innerHTML = `<b>盼头 · ${stage}</b><span>${next}</span>`;
+  }
+
+  function runStageLabel(p) {
+    if (game.time >= 180) return "极限挑战";
+    if (game.evolutionPickups > 0 || Object.values(p.evolutions).some(Boolean)) return "成型清场";
+    if (game.time >= 70 || p.level >= 5) return "中期成型";
+    return "前期求生";
+  }
+
+  function nextRunGoal(p) {
+    const ready = readyEvolutionNames(p);
+    if (ready.length) return `超武已备：${ready[0]}。下次升级优先拿，马上会有专属爆发。`;
+    if (game.chests.length) return `场上有 ${game.chests.length} 个宝箱，去捡月匣拿 1/3/5 个奖励。`;
+    const needXp = Math.max(0, p.nextXp - p.xp);
+    if (needXp <= 3) return `还差 ${needXp} 点月露升级，马上三选一。`;
+    const next = nextEvolutionHint(p);
+    if (next.ready > 0) return `追超武：${next.text}`;
+    if (!game.bossSpawned && game.time < 135) return `${formatTime(135 - game.time)} 后 Boss 带月匣进场；先补主路线和保命。`;
+    const eliteIn = Math.max(1, Math.ceil(game.eliteTimer));
+    return `${eliteIn} 秒后精英逼近；击破大概率掉宝箱。`;
+  }
+
+  function readyEvolutionNames(p) {
+    return upgrades.filter((up) => up.type === "超武" && (!up.available || up.available(p))).map((up) => up.name);
+  }
+
+  function nextEvolutionHint(p) {
+    const hints = [
+      { name: "万象墨锋", ready: Math.min(p.brushCount / 6, 1) + (p.abilities.inkMark ? 0.4 : 0) + (p.branches.brushSplinter || p.branches.brushRain ? 0.35 : 0), text: `万象墨锋还差：墨锋 ${Math.min(p.brushCount, 6)}/6，墨印${p.abilities.inkMark ? "已备" : "未备"}，散毫/骤雨${p.branches.brushSplinter || p.branches.brushRain ? "已备" : "未备"}。` },
+      { name: "星河轮", ready: Math.min(p.orbs / 6, 1) + (p.relics.starChart ? 0.45 : 0) + (p.branches.orbShatter || p.branches.orbRecall ? 0.3 : 0), text: `星河轮还差：星铃 ${Math.min(p.orbs, 6)}/6，星盘${p.relics.starChart ? "已备" : "未备"}，碎星/归潮${p.branches.orbShatter || p.branches.orbRecall ? "已备" : "未备"}。` },
+      { name: "白月焰莲", ready: Math.min(p.flameLevel / 5, 1) + (p.abilities.emberWeb ? 0.45 : 0) + (p.branches.flameCinder || p.branches.flameTide ? 0.3 : 0), text: `白月焰莲还差：月焰 ${Math.min(p.flameLevel, 5)}/5，余烬${p.abilities.emberWeb ? "已备" : "未备"}，烬环/潮汐${p.branches.flameCinder || p.branches.flameTide ? "已备" : "未备"}。` },
+      { name: "霜月琴", ready: Math.min(p.frostLevel / 5, 1) + (p.branches.frostEcho ? 0.35 : 0) + (p.branches.frostLattice ? 0.35 : 0), text: `霜月琴还差：霜弦 ${Math.min(p.frostLevel, 5)}/5，裂音${p.branches.frostEcho ? "已备" : "未备"}，封阵${p.branches.frostLattice ? "已备" : "未备"}。` },
+      { name: "天雨织机", ready: Math.min(p.needleLevel / 5, 1) + (p.branches.needleCurtain || p.branches.needleSeal ? 0.4 : 0) + (p.abilities.dewPulse ? 0.35 : 0), text: `天雨织机还差：雨墨针 ${Math.min(p.needleLevel, 5)}/5，针雨分支${p.branches.needleCurtain || p.branches.needleSeal ? "已备" : "未备"}，引露${p.abilities.dewPulse ? "已备" : "未备"}。` },
+      { name: "清风玉阙", ready: Math.min(p.fanLevel / 5, 1) + (p.branches.fanGale ? 0.45 : 0) + (getPickCount("focus") > 0 || p.abilities.dewPulse ? 0.3 : 0), text: `清风玉阙还差：玉扇风 ${Math.min(p.fanLevel, 5)}/5，回廊${p.branches.fanGale ? "已备" : "未备"}，站定/引露${getPickCount("focus") > 0 || p.abilities.dewPulse ? "已备" : "未备"}。` },
+    ].sort((a, b) => b.ready - a.ready);
+    return hints[0] || { ready: 0, text: "先拿一把主武器和一个能联动的能力，构筑会更快成型。" };
   }
 
   function renderBuildPanels() {

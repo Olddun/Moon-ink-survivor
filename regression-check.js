@@ -172,6 +172,7 @@ async function main() {
       weaponRouteReadable: document.querySelector("#weaponBuildPanel").textContent.includes("路线") && document.querySelector("#weaponBuildPanel").textContent.includes("飞得更勤") && document.querySelector("#weaponBuildPanel").textContent.includes("每下更亮"),
       relicText: document.querySelector("#relicBuildPanel").textContent,
       traitText: document.querySelector("#traitBuildPanel").textContent,
+      goalText: document.querySelector("#runGoal").textContent,
       expanded: [...document.querySelectorAll(".build-panel")].map((panel) => panel.dataset.expanded),
       thumbIcons: document.querySelectorAll(".build-panel-thumbs .mini-glyph").length,
       detailHidden: [...document.querySelectorAll(".build-panel")].every((panel) => getComputedStyle(panel.querySelector(".build-panel-items")).display === "none"),
@@ -2522,6 +2523,9 @@ async function main() {
     desktop.buildPanelsInitial.weaponRouteReadable &&
     desktop.buildPanelsInitial.traitText.includes("流萤拾露") &&
     desktop.buildPanelsInitial.traitText.includes("萤露回灯") &&
+    desktop.buildPanelsInitial.goalText.includes("盼头") &&
+    /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) &&
+    /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText) &&
     desktop.characterTraitFx.exposed &&
     desktop.characterTraitFx.bloomCount >= 4 &&
     desktop.characterTraitFx.projectileDelta >= 3 &&
@@ -3026,6 +3030,9 @@ async function main() {
     desktop.after.canvasBytes > 5000 &&
     !desktop.after.upgradeVisible &&
     desktop.death.gameOverVisible &&
+    desktop.death.text.includes("这把故事") &&
+    desktop.death.text.includes("差一点") &&
+    desktop.death.text.includes("下把可试") &&
     mobile.initial.choices === "1fr" &&
     mobile.initial.characters === 4 &&
     mobile.initial.characterColumns.split(" ").length === 2 &&
@@ -3039,6 +3046,7 @@ async function main() {
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
+  note("run goal", desktop.buildPanelsInitial.goalText.includes("盼头") && /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) && /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText));
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text));
   note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));
   note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.routeSummaries >= 10 && desktop.codexOpen.routeSummaryText.includes("下次可改选") && desktop.codexOpen.routeSummaryText.includes("路线：") && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
@@ -3049,6 +3057,7 @@ async function main() {
   note("late branches", desktop.needleBranchOption.exists && desktop.needleBranchEffect.triggered && desktop.frostEchoOption.exists && desktop.frostEchoEffect.triggered && desktop.frostLatticeOption.exists && desktop.frostLatticeEffect.triggered && desktop.frostSuperOption.exists && desktop.frostSuperEffect.evolved && desktop.rainSuperOption.exists && desktop.rainSuperEffect.evolved);
   note("relic links", desktop.branchInkstoneOption.exists && desktop.branchInkstoneEffect.owned && desktop.routeCharmOption.exists && desktop.routeCharmEffect.owned && desktop.tempoBellOption.exists && desktop.tempoBellEffect.owned && desktop.chestPrismOption.exists && desktop.chestPrismEffect.owned && desktop.chestPrismEffect.result.triggered && desktop.chestPrismEffect.result.count >= 2 && desktop.chestPrismEffect.spawned >= 5 && desktop.chestPrismEffect.sources.includes("starShard") && desktop.chestPrismEffect.prismBloom && desktop.chestPrismEffect.panel.includes("匣纹棱镜"));
   note("final ui", desktop.after.relicPanel.length > 0 && desktop.after.relicPanel.includes("Lv") && desktop.after.traitPanel.length > 0 && desktop.after.traitPanel.includes("Lv") && desktop.after.buildPanelIcons >= 3 && desktop.after.canvasBytes > 5000 && !desktop.after.upgradeVisible && desktop.death.gameOverVisible && mobile.initial.choices === "1fr" && mobile.initial.characters === 4 && mobile.initial.characterColumns.split(" ").length === 2 && mobile.after.touch === "block" && errors.length === 0);
+  note("death recap", desktop.death.gameOverVisible && desktop.death.text.includes("这把故事") && desktop.death.text.includes("差一点") && desktop.death.text.includes("下把可试"));
 
   const result = { pass, failed, desktop, mobile, errors };
   console.log(JSON.stringify(result, null, 2));
