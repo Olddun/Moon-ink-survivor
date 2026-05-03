@@ -2248,6 +2248,19 @@ body[data-game-state="menu"] .pause-button {
   line-height: 1.45;
 }
 
+.codex-route-summary {
+  display: block;
+  margin-top: 8px;
+  padding: 6px 8px;
+  border: 1px solid rgba(43, 122, 120, 0.18);
+  border-radius: 7px;
+  background: rgba(43, 122, 120, 0.08);
+  color: #31585c;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
 .evolution-tree {
   position: absolute;
   left: 10px;

@@ -4829,7 +4829,7 @@
         card.dataset.id = item.id;
         card.dataset.type = item.type;
         card.tabIndex = 0;
-        card.innerHTML = `<div class="codex-card-top"><em>${item.type}</em><b>${owned ? "已获得" : ready ? "可合成/可遇" : "未完成"}</b></div><span class="codex-glyph" data-glyph="${item.id}"></span><strong>${item.name}</strong><p>${item.desc}</p><small>${item.state(p)}</small>${renderEvolutionTree(item, p)}`;
+        card.innerHTML = `<div class="codex-card-top"><em>${item.type}</em><b>${owned ? "已获得" : ready ? "可合成/可遇" : "未完成"}</b></div><span class="codex-glyph" data-glyph="${item.id}"></span><strong>${item.name}</strong><p>${item.desc}</p><small>${item.state(p)}</small>${renderCodexRouteSummary(item, p)}${renderEvolutionTree(item, p)}`;
         card.addEventListener("pointerenter", () => card.classList.add("tree-open"));
         card.addEventListener("pointerleave", () => card.classList.remove("tree-open"));
         card.addEventListener("focus", () => card.classList.add("tree-open"));
@@ -4854,6 +4854,21 @@
     return `<div class="evolution-tree" aria-label="${item.name}进化树"><span>进化树</span>${nodes
       .map((node, index) => `<i class="tree-node is-${node.status || "locked"}"><b>${index + 1}</b>${plainTreeText(node.text)}</i>`)
       .join("")}</div>`;
+  }
+
+  function renderCodexRouteSummary(item, player) {
+    const summary = codexRouteSummary(item, player);
+    if (!summary) return "";
+    return `<span class="codex-route-summary">${summary}</span>`;
+  }
+
+  function codexRouteSummary(item, player) {
+    const baseId = item.id?.startsWith("weapon-") ? item.id.replace("weapon-", "") : item.id;
+    const variants = upgradeVariants[baseId];
+    if (!variants?.length) return "";
+    const routeKeys = routeModKeys[baseId] || {};
+    const counts = variants.map((variant) => `${variant.name} ${player.mods[routeKeys[variant.id]] || 0}`);
+    return `路线：${counts.join(" / ")} · 下次可改选`;
   }
 
   function codexRouteNodes(item, player) {
