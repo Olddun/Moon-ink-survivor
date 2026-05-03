@@ -773,7 +773,10 @@ async function main() {
     });
     const brushCodexCard = page.locator('.codex-card[data-id="weapon-brush"]');
     if ((await brushCodexCard.count()) === 1) {
-      await brushCodexCard.focus();
+      await page.evaluate(() => {
+        const card = document.querySelector('.codex-card[data-id="weapon-brush"]');
+        card?.focus();
+      });
       await page.waitForTimeout(320);
     } else {
       errors.push("brush codex card was not unique");
