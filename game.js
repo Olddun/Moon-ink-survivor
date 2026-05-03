@@ -34,6 +34,7 @@
     weaponBuildPanel: document.getElementById("weaponBuildPanel"),
     relicBuildPanel: document.getElementById("relicBuildPanel"),
     traitBuildPanel: document.getElementById("traitBuildPanel"),
+    routeToast: document.getElementById("routeToast"),
     runSubtitle: document.getElementById("runSubtitle"),
     healthBar: document.getElementById("healthBar"),
     healthText: document.getElementById("healthText"),
@@ -193,6 +194,7 @@
   let selectedCharacterId = "wanderer";
   let pauseReturnState = "playing";
   let codexReturnState = null;
+  let routeToastTimer = null;
 
   const game = {
     time: 0,
@@ -1664,6 +1666,7 @@
     game.chestsOpened = 0;
     game.picks = [];
     game.lastVariant = "";
+    hideRouteToast();
     game.player = {
       x: world.w / 2,
       y: world.h / 2,
@@ -3614,6 +3617,7 @@
     if (upgrade.variantApply) upgrade.variantApply(game.player);
     if (upgrade.variantId) {
       game.lastVariant = `${upgrade.baseName || upgrade.name}：${upgrade.variantName}`;
+      showRouteToast(upgrade);
       triggerRouteFeedback(upgrade.baseId || upgrade.id, upgrade.variantId);
       triggerRouteCharm(upgrade.baseId || upgrade.id);
     }
@@ -3989,6 +3993,22 @@
     const routeCount = pool.filter((up) => getRouteOptions(up).length).length;
     const targetNames = [...new Set(pool.map((up) => upgradeBuildTarget(up)?.name || (["遗物", "能力", "超武"].includes(up.type) ? up.type : "通用补强")))].slice(0, 3);
     ui.upgradePlan.innerHTML = `<span><b>当前主线</b>${archetype.name}</span><span><b>建议下一步</b>${nextBuildGoal(p, archetype)}</span><span><b>本轮候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 项可二选一改方向` : ""}</span>`;
+  }
+
+  function showRouteToast(upgrade) {
+    if (!ui.routeToast) return;
+    if (routeToastTimer) window.clearTimeout(routeToastTimer);
+    const routeName = upgrade.variantName || "本次方向";
+    const baseName = upgrade.baseName || upgrade.name || "升级";
+    ui.routeToast.innerHTML = `<b>已改方向：${baseName}</b><span>${routeName} · ${routePayoffHint(upgrade)}</span>`;
+    ui.routeToast.classList.add("visible");
+    routeToastTimer = window.setTimeout(() => hideRouteToast(), 2600);
+  }
+
+  function hideRouteToast() {
+    if (routeToastTimer) window.clearTimeout(routeToastTimer);
+    routeToastTimer = null;
+    ui.routeToast?.classList.remove("visible");
   }
 
   function getRouteOptions(upgrade) {

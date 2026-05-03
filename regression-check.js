@@ -254,6 +254,7 @@ async function main() {
     let sawAbility = false;
     let sawRelic = false;
     let choiceStyle = { colored: false, icons: false };
+    let routeToast = { visible: false, text: "" };
     async function captureChoiceStyle() {
       return page.$$eval(".choice", (buttons) => ({
           types: buttons.map((button) => button.dataset.type || ""),
@@ -1345,6 +1346,15 @@ async function main() {
     });
     if (needleOption.exists) {
       await page.locator('.choice[data-base-id="needle"]').click();
+      await page.waitForTimeout(160);
+      routeToast = await page.evaluate(() => {
+        const el = document.querySelector("#routeToast");
+        return {
+          visible: el?.classList.contains("visible") || false,
+          text: el?.textContent || "",
+          top: el ? getComputedStyle(el).top : "",
+        };
+      });
       await page.waitForTimeout(1050);
     } else {
       errors.push("needle weapon option did not appear");
@@ -2382,7 +2392,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2532,11 +2542,10 @@ async function main() {
     desktop.choiceStyle.upgradePlan.includes("当前主线") &&
     desktop.choiceStyle.upgradePlan.includes("建议下一步") &&
     desktop.choiceStyle.upgradePlan.includes("本轮候选") &&
-    desktop.choiceStyle.routeCards >= 1 &&
-    desktop.choiceStyle.routePlain &&
-    desktop.choiceStyle.routePayoff &&
-    desktop.choiceStyle.routeAria &&
-    desktop.choiceStyle.routeHelp &&
+    desktop.routeToast.visible &&
+    desktop.routeToast.text.includes("已改方向") &&
+    desktop.routeToast.text.includes("雨墨针") &&
+    /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text) &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&
@@ -2622,8 +2631,8 @@ async function main() {
     desktop.after.level >= 2 &&
     desktop.after.kills > 0 &&
     desktop.after.build.includes("/") &&
-    desktop.after.weaponPanel.includes("墨锋") &&
     desktop.after.weaponPanel.includes("Lv") &&
+    ["墨锋", "流萤灯", "星铃", "月焰", "霜弦", "照影符", "玉简雷", "雨墨针", "玉扇风", "墨莲伞"].some((name) => desktop.after.weaponPanel.includes(name)) &&
     desktop.after.superBuildFrame.exists &&
     desktop.after.superBuildFrame.id.startsWith("evolve-") &&
     desktop.after.superBuildFrame.markWidth >= 34 &&
@@ -2748,6 +2757,8 @@ async function main() {
     desktop.needleOption.routeText.includes("选后") &&
     desktop.needleOption.routeText.includes("这边") &&
     desktop.needleOption.routeText.includes("另一边") &&
+    desktop.needleOption.routeText.includes("更常发动") &&
+    desktop.needleOption.routeText.includes("发动少") &&
     desktop.needleOption.routeTags.includes("打法：多目标落针") &&
     desktop.needleOption.routeTags.includes("打法：减速增伤") &&
     desktop.needleOption.text.includes("不会被上次选择锁住") &&
@@ -3012,9 +3023,10 @@ async function main() {
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
+  note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|发动少|更常发动|收益/.test(desktop.routeToast.text));
   note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.routeSummaries >= 10 && desktop.codexOpen.routeSummaryText.includes("下次可改选") && desktop.codexOpen.routeSummaryText.includes("路线：") && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
   note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && desktop.codexTree.text.includes("路线1") && desktop.codexTree.text.includes("不会被上次路线锁住") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
-  note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("墨锋") && desktop.after.weaponPanel.includes("Lv") && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");
+  note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("Lv") && ["墨锋", "流萤灯", "星铃", "月焰", "霜弦", "照影符", "玉简雷", "雨墨针", "玉扇风", "墨莲伞"].some((name) => desktop.after.weaponPanel.includes(name)) && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");
   note("umbrella lotus", desktop.umbrellaLotusOption.exists && desktop.umbrellaLotusOption.type === "武器" && desktop.umbrellaLotusOption.text.includes("墨伞莲阵") && desktop.umbrellaLotusOption.effect.includes("短暂阵地") && desktop.umbrellaLotusEffect.level >= 1 && desktop.umbrellaLotusEffect.triggered && desktop.umbrellaLotusEffect.beams >= 5 && desktop.umbrellaLotusEffect.bloom && desktop.umbrellaLotusEffect.inkstoneBloom && desktop.umbrellaLotusEffect.trail && desktop.umbrellaLotusEffect.damaged && desktop.umbrellaLotusEffect.slowed && desktop.umbrellaLotusEffect.dewCharged && desktop.umbrellaLotusEffect.cooldownReduced && desktop.umbrellaLotusEffect.panel.includes("墨伞莲阵"));
   note("umbrella echo", desktop.umbrellaEchoOption.exists && desktop.umbrellaEchoOption.type === "武器" && desktop.umbrellaEchoOption.text.includes("伞影回潮") && desktop.umbrellaEchoOption.effect.includes("追打外圈敌人") && desktop.umbrellaEchoEffect.level >= 1 && desktop.umbrellaEchoEffect.triggered && desktop.umbrellaEchoEffect.beams >= 6 && desktop.umbrellaEchoEffect.bloom && desktop.umbrellaEchoEffect.inkstoneBloom && desktop.umbrellaEchoEffect.trail && desktop.umbrellaEchoEffect.damaged && desktop.umbrellaEchoEffect.slowed && desktop.umbrellaEchoEffect.dewCharged && desktop.umbrellaEchoEffect.cooldownReduced && desktop.umbrellaEchoEffect.panel.includes("伞影回潮"));
   note("late branches", desktop.needleBranchOption.exists && desktop.needleBranchEffect.triggered && desktop.frostEchoOption.exists && desktop.frostEchoEffect.triggered && desktop.frostLatticeOption.exists && desktop.frostLatticeEffect.triggered && desktop.frostSuperOption.exists && desktop.frostSuperEffect.evolved && desktop.rainSuperOption.exists && desktop.rainSuperEffect.evolved);
