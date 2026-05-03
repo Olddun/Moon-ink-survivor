@@ -3962,6 +3962,7 @@
 
   function conciseUpgradeSynergy(upgrade) {
     const text = describeUpgradeSynergy(upgrade)
+      .replace(/^流派：/, "玩法：")
       .replace(/后续看/g, "追")
       .replace(/当前局：/g, "")
       .replace(/，/g, "，")

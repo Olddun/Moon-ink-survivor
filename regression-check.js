@@ -2549,7 +2549,7 @@ async function main() {
     desktop.choiceStyle.effects &&
     desktop.choiceStyle.effectText.includes("本次") &&
     desktop.choiceStyle.synergy &&
-    /流派|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
+    /玩法|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
     desktop.choiceStyle.fit &&
     desktop.choiceStyle.fitText.includes("主线") &&
     desktop.choiceStyle.upgradePlanCards === 3 &&
