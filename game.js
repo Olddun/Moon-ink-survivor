@@ -3889,6 +3889,15 @@
     return effects[upgrade.id] || "本次：获得该升级";
   }
 
+  function conciseUpgradeEffect(upgrade) {
+    return describeUpgradeEffect(upgrade)
+      .replace(/（升至 Lv [^)]+）/g, "")
+      .replace(/；本级方向会额外生效/g, "")
+      .replace(/解锁\/强化/g, "强化")
+      .replace(/额外/g, "多")
+      .trim();
+  }
+
   function describeUpgradeSynergy(upgrade) {
     const id = upgrade.baseId || upgrade.id;
     const variant = upgrade.variantName ? ` · ${upgrade.variantName}` : "";
@@ -3951,6 +3960,18 @@
     return hints[id] || "流派：通用成长，补强当前构筑";
   }
 
+  function conciseUpgradeSynergy(upgrade) {
+    const text = describeUpgradeSynergy(upgrade)
+      .replace(/后续看/g, "追")
+      .replace(/当前局：/g, "")
+      .replace(/，/g, "，")
+      .trim();
+    const [head, tail = ""] = text.split("，");
+    if (!tail) return head.length > 30 ? `${head.slice(0, 30)}…` : head;
+    const compact = `${head}，${tail}`;
+    return compact.length > 42 ? `${compact.slice(0, 42)}…` : compact;
+  }
+
   function showUpgrades() {
     state = "upgrade";
     const pool = buildUpgradePool();
@@ -3970,7 +3991,8 @@
       card.dataset.baseId = up.baseId || up.id;
       card.dataset.type = up.type || "升级";
       const routeOptions = getRouteOptions(up);
-      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${up.baseName || up.name}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次升级从下面 2 条路线里选 1 条；以后再升级还可以重新选。" : describeUpgradeEffect(up)}</span><span class="choice-synergy">${describeUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}<span class="choice-desc">${describeChoiceNote(up)}</span>`;
+      const note = describeChoiceNote(up);
+      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${up.baseName || up.name}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次：2 条路线选 1 条，马上生效。" : conciseUpgradeEffect(up)}</span><span class="choice-synergy">${conciseUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}${note ? `<span class="choice-desc">${note}</span>` : ""}`;
       const choose = async (upgrade) => {
         if (transitioning) return;
         applyUpgrade(upgrade);
@@ -4014,7 +4036,7 @@
     const archetype = getBuildArchetype(p);
     const routeCount = pool.filter((up) => getRouteOptions(up).length).length;
     const targetNames = [...new Set(pool.map((up) => upgradeBuildTarget(up)?.name || (["遗物", "能力", "超武"].includes(up.type) ? up.type : "通用补强")))].slice(0, 3);
-    ui.upgradePlan.innerHTML = `<span><b>当前主线</b>${archetype.name}</span><span><b>建议下一步</b>${nextBuildGoal(p, archetype)}</span><span><b>本轮候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 项可二选一改方向` : ""}</span>`;
+    ui.upgradePlan.innerHTML = `<span><b>当前主线</b>${archetype.name}</span><span><b>建议下一步</b>${shortNextBuildGoal(p, archetype)}</span><span><b>本轮候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 项二选一` : ""}</span>`;
   }
 
   function showRouteToast(upgrade) {
@@ -4043,7 +4065,7 @@
 
   function renderRouteChoices(upgrade, routes) {
     if (!routes.length) return "";
-    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}" aria-label="${routeAriaLabel(route, routes)}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><strong class="route-plain">${routePlainCompare(route, routes)}</strong><em class="route-payoff">${routePayoffHint(route)}</em><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>点这两个小按钮选方向；喜欢另一边就直接点另一边，不会被上次选择锁住。</p></div>`;
+    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}" aria-label="${routeAriaLabel(route, routes)}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${plainRouteGoal(route)}</i><em class="route-payoff">${routePayoffHint(route)}</em><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两边都能选；下次升级同一武器还能改。</p></div>`;
   }
 
   function routeAriaLabel(route, routes) {
@@ -4087,9 +4109,9 @@
   function describeUpgradeFit(upgrade) {
     const current = getBuildArchetype(game.player);
     const target = upgradeBuildTarget(upgrade);
-    if (!target) return `当前局：主线 ${current.name}；这项是通用补强，不会把你锁进某条路线。`;
-    if (target.id === current.id) return `当前局：主线 ${current.name}；这项会继续加厚主线，马上更稳。`;
-    return `当前局：主线 ${current.name}；这项会补一条 ${target.name} 副线，适合想换方向时点。`;
+    if (!target) return `当前局：主线 ${current.name}；通用补强。`;
+    if (target.id === current.id) return `当前局：主线 ${current.name}；继续强化主线。`;
+    return `当前局：主线 ${current.name}；改走 ${target.name} 副线。`;
   }
 
   function upgradeBuildTarget(upgrade) {
@@ -4155,11 +4177,14 @@
   function describeChoiceNote(upgrade) {
     const text = upgrade.baseDesc || upgrade.desc || "";
     const conditionMatch = text.match(/^(合成：[^。]+。|[^。]+后出现。)/);
-    const condition = conditionMatch ? conditionMatch[1].replace(/^合成：/, "需要：").replace(/后出现。$/, "后会加入候选。") : "";
-    const body = condition ? text.slice(conditionMatch[1].length).trim() : text;
-    if (condition) return `${body} ${condition}`;
-    if (upgrade.variantId) return `${text.replace(/本次方向：[^。]+。/, "").trim()} 可在两条路线之间反复选择。`;
-    return text;
+    if (conditionMatch) return conditionMatch[1].replace(/^合成：/, "出现条件：").replace(/后出现。$/, "后会加入候选。");
+    if (upgrade.variantId) return "提示：两条路线以后还能改，不会锁死。";
+    return "";
+  }
+
+  function shortNextBuildGoal(p, archetype) {
+    const text = nextBuildGoal(p, archetype).replace(/。.+$/, "。");
+    return text.length > 32 ? `${text.slice(0, 32)}…` : text;
   }
 
   function buildUpgradePool() {

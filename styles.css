@@ -1084,7 +1084,7 @@ body[data-game-state="menu"] .route-toast {
 
 .choice strong {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 17px;
 }
 
@@ -1093,10 +1093,10 @@ body[data-game-state="menu"] .route-toast {
 .choice-synergy,
 .choice-fit {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border-radius: 7px;
   font-weight: 850;
-  line-height: 1.38;
+  line-height: 1.32;
 }
 
 .choice-level {
@@ -1108,7 +1108,7 @@ body[data-game-state="menu"] .route-toast {
 }
 
 .choice-effect {
-  padding: 8px 9px;
+  padding: 7px 9px;
   border: 1px solid rgba(31, 38, 48, 0.1);
   background: rgba(255, 249, 237, 0.72);
   color: var(--ink);
@@ -1116,7 +1116,7 @@ body[data-game-state="menu"] .route-toast {
 }
 
 .choice-synergy {
-  padding: 7px 9px;
+  padding: 6px 8px;
   border: 1px solid color-mix(in srgb, var(--reward-a) 18%, transparent);
   background:
     linear-gradient(120deg, color-mix(in srgb, var(--reward-a) 10%, transparent), rgba(255, 249, 237, 0.68)),
@@ -1127,7 +1127,7 @@ body[data-game-state="menu"] .route-toast {
 }
 
 .choice-fit {
-  padding: 6px 9px;
+  padding: 5px 8px;
   border: 1px dashed color-mix(in srgb, var(--reward-b) 30%, transparent);
   background: rgba(255, 249, 237, 0.52);
   color: #5b4d32;
@@ -1139,8 +1139,8 @@ body[data-game-state="menu"] .route-toast {
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 9px 0 10px;
+  gap: 7px;
+  margin: 7px 0 8px;
 }
 
 .route-compare p {
@@ -1149,12 +1149,12 @@ body[data-game-state="menu"] .route-toast {
   color: #56585d;
   font-size: 11px;
   font-weight: 780;
-  line-height: 1.35;
+  line-height: 1.28;
 }
 
 .route-option {
-  min-height: 84px;
-  padding: 10px 9px;
+  min-height: 68px;
+  padding: 8px 8px;
   border: 1px solid color-mix(in srgb, var(--reward-a) 30%, transparent);
   border-radius: 7px;
   background:
@@ -1261,7 +1261,7 @@ body[data-game-state="menu"] .route-toast {
 
 .choice em {
   display: inline-block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   padding: 4px 7px;
   border-radius: 999px;
   background: rgba(31, 38, 48, 0.08);
@@ -2674,9 +2674,10 @@ body[data-game-state="menu"] .route-toast {
   position: relative;
   z-index: 1;
   color: #56585d;
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 650;
-  line-height: 1.55;
+  line-height: 1.35;
+  opacity: 0.82;
 }
 
 .compact {

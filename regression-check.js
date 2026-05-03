@@ -283,10 +283,10 @@ async function main() {
           routeCards: buttons.filter((button) => button.querySelectorAll(".route-option").length === 2).length,
           routeText: buttons.map((button) => [...button.querySelectorAll(".route-option")].map((route) => route.textContent || "").join(" / ")).join("|"),
           routeTags: buttons.map((button) => [...button.querySelectorAll(".route-tag")].map((tag) => tag.textContent || "").join(" / ")).join("|"),
-          routePlain: buttons.some((button) => [...button.querySelectorAll(".route-plain")].some((plain) => plain.textContent.includes("这边") && plain.textContent.includes("另一边"))),
+          routePlain: buttons.some((button) => [...button.querySelectorAll(".route-tag")].some((tag) => (tag.textContent || "").trim().length > 0)),
           routePayoff: buttons.some((button) => [...button.querySelectorAll(".route-payoff")].some((payoff) => /马上生效|发动少|更常发动|收益/.test(payoff.textContent || ""))),
           routeAria: buttons.some((button) => [...button.querySelectorAll(".route-option")].every((route) => (route.getAttribute("aria-label") || "").includes("已选") && (route.getAttribute("aria-label") || "").includes("这边"))),
-          routeHelp: buttons.some((button) => (button.querySelector(".route-compare p")?.textContent || "").includes("不会被上次选择锁住")),
+          routeHelp: buttons.some((button) => (button.querySelector(".route-compare p")?.textContent || "").includes("还能改")),
       }));
     }
     async function chooseVisibleUpgrade(preferType = "能力") {
@@ -2775,13 +2775,11 @@ async function main() {
     desktop.needleOption.routeText.includes("路线二") &&
     desktop.needleOption.routeText.includes("已选") &&
     desktop.needleOption.routeText.includes("选后") &&
-    desktop.needleOption.routeText.includes("这边") &&
-    desktop.needleOption.routeText.includes("另一边") &&
     desktop.needleOption.routeText.includes("更常发动") &&
     desktop.needleOption.routeText.includes("发动少") &&
-    desktop.needleOption.routeTags.includes("打法：多目标落针") &&
-    desktop.needleOption.routeTags.includes("打法：减速增伤") &&
-    desktop.needleOption.text.includes("不会被上次选择锁住") &&
+    desktop.needleOption.routeTags.includes("多目标落针") &&
+    desktop.needleOption.routeTags.includes("减速增伤") &&
+    desktop.needleOption.text.includes("还能改") &&
     desktop.needleEffect.level >= 1 &&
     desktop.needleEffect.triggered &&
     desktop.needleEffect.beams >= 3 &&
@@ -2799,8 +2797,6 @@ async function main() {
     desktop.fanOption.routeText.includes("回风返场") &&
     desktop.fanOption.routeText.includes("已选") &&
     desktop.fanOption.routeText.includes("选后") &&
-    desktop.fanOption.routeText.includes("这边") &&
-    desktop.fanOption.routeText.includes("另一边") &&
     desktop.fanEffect.level >= 1 &&
     desktop.fanEffect.returnRoute >= 1 &&
     desktop.fanEffect.triggered &&
@@ -2869,8 +2865,6 @@ async function main() {
     desktop.umbrellaOption.routeText.includes("伞骨反刺") &&
     desktop.umbrellaOption.routeText.includes("已选") &&
     desktop.umbrellaOption.routeText.includes("选后") &&
-    desktop.umbrellaOption.routeText.includes("这边") &&
-    desktop.umbrellaOption.routeText.includes("另一边") &&
     desktop.umbrellaOption.effect.includes("2 条路线") &&
     desktop.umbrellaEffect.level >= 1 &&
     desktop.umbrellaEffect.spineRoute >= 1 &&
