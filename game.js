@@ -1049,6 +1049,41 @@
       })),
     },
     {
+      title: "首领",
+      items: [
+        {
+          id: "boss-ring",
+          type: "Boss",
+          name: "墨环首领",
+          desc: "击破数到了会进场，靠近会放大范围墨环；第一只掉 3 奖励宝箱。",
+          state: () => bossStateText("ring"),
+          owned: () => game.bossesDefeated >= 1,
+          ready: () => bossKindByTier(game.bossesDefeated + 1) === "ring",
+          tree: () => bossTree("ring", "大圈压场", "离远一点，等它放完圈再反打。"),
+        },
+        {
+          id: "boss-beam",
+          type: "Boss",
+          name: "星束首领",
+          desc: "第二轮开始出现，放射星束切场；击破后稳定掉 5 奖励宝箱。",
+          state: () => bossStateText("beam"),
+          owned: () => game.bossesDefeated >= 2,
+          ready: () => bossKindByTier(game.bossesDefeated + 1) === "beam",
+          tree: () => bossTree("beam", "多道直线光束", "贴着光束缝隙走，优先用减速或高爆发打掉。"),
+        },
+        {
+          id: "boss-storm",
+          type: "Boss",
+          name: "雷雨首领",
+          desc: "后续轮换出现，会围着玩家落雷；越到后面落雷越密。",
+          state: () => bossStateText("storm"),
+          owned: () => game.bossesDefeated >= 3,
+          ready: () => bossKindByTier(game.bossesDefeated + 1) === "storm",
+          tree: () => bossTree("storm", "追身落雷", "一直小步移动，别贪站定；护圈、减速和拾取爆发更稳。"),
+        },
+      ],
+    },
+    {
       title: "武器",
       items: [
         {
@@ -2043,7 +2078,7 @@
     const bossTier = boss ? game.bossesDefeated + 1 : 0;
     const typeRoll = Math.random();
     const type = boss ? "boss" : elite ? "elite" : typeRoll > 0.78 ? "swift" : typeRoll > 0.55 ? "bloom" : "shade";
-    const bossKind = boss ? ["ring", "beam", "storm"][(bossTier - 1) % 3] : "";
+    const bossKind = boss ? bossKindByTier(bossTier) : "";
     const stats = {
       shade: { r: 17, hp: 20 * hpScale, speed: 76 + game.wave * 3, dmg: 11, xp: 1, color: palette.softInk },
       swift: { r: 13, hp: 14 * hpScale, speed: 122 + game.wave * 3, dmg: 8, xp: 1, color: palette.coral },
@@ -3610,7 +3645,7 @@
     const chestChance = enemy.type === "boss" ? 1 : enemy.type === "elite" ? 0.72 : enemy.type === "bloom" ? 0.045 : 0.025;
     if (Math.random() < chestChance) {
       const chestTier = enemy.type === "boss" ? "boss" : enemy.type === "elite" ? "elite" : "common";
-      const bossRewardCount = enemy.type === "boss" ? (enemy.bossTier >= 2 ? 5 : 3) : null;
+      const bossRewardCount = enemy.type === "boss" ? bossRewardCountForTier(enemy.bossTier || 1) : null;
       spawnChest(enemy.x + rand(-12, 12), enemy.y + rand(-12, 12), chestTier, bossRewardCount);
     }
     spawnParticles(enemy.x, enemy.y, enemy.color, enemy.type === "boss" ? 42 : 12);
@@ -5031,21 +5066,55 @@
     if (ready.length) return `超武已备：${ready[0]}。下次升级优先拿，马上会有专属爆发。`;
     if (game.chests.length) return `场上有 ${game.chests.length} 个宝箱，去捡月匣拿 1/3/5 个奖励。`;
     const activeBoss = game.enemies.find((enemy) => enemy.type === "boss");
-    if (activeBoss) return `Boss ${bossDisplayName(activeBoss)} 正在压场；击破必掉大宝箱。`;
+    if (activeBoss) return `Boss ${bossDisplayName(activeBoss)} 正在压场；击破会掉 ${bossRewardCountForTier(activeBoss.bossTier || 1)} 奖励大宝箱。`;
     const bossKills = Math.max(0, game.nextBossKills - game.kills);
-    if (bossKills <= 8) return `再击破 ${bossKills} 个敌人，下一只 Boss 带大宝箱进场。`;
+    const nextBossTier = game.bossesDefeated + 1;
+    if (bossKills <= 8) return `再击破 ${bossKills} 个敌人，Boss ${bossDisplayName({ bossTier: nextBossTier })} 带 ${bossRewardCountForTier(nextBossTier)} 奖励进场。`;
     const needXp = Math.max(0, p.nextXp - p.xp);
     if (needXp <= 3) return `还差 ${needXp} 点月露升级，马上三选一。`;
     const next = nextEvolutionHint(p);
     if (next.ready > 0) return `追超武：${next.text}`;
-    if (!game.bossSpawned) return `还差 ${bossKills} 个击破触发 Boss；先补主路线和保命。`;
+    if (!game.bossSpawned) return `还差 ${bossKills} 个击破触发 Boss ${bossDisplayName({ bossTier: nextBossTier })}；先补主路线和保命。`;
     const eliteIn = Math.max(1, Math.ceil(game.eliteTimer));
     return `${eliteIn} 秒后精英逼近；击破大概率掉宝箱。`;
   }
 
+  function bossKindByTier(tier) {
+    return ["ring", "beam", "storm"][(Math.max(1, tier) - 1) % 3];
+  }
+
+  function bossRewardCountForTier(tier) {
+    return Math.max(1, tier) >= 2 ? 5 : 3;
+  }
+
+  function bossStateText(kind) {
+    const nextTier = game.bossesDefeated + 1;
+    const nextKind = bossKindByTier(nextTier);
+    if (nextKind === kind && !game.bossSpawned) {
+      return `下一只 · 还差 ${Math.max(0, game.nextBossKills - game.kills)} 击破 · ${bossRewardCountForTier(nextTier)} 奖励`;
+    }
+    const defeatedLabel = kind === "ring" ? 1 : kind === "beam" ? 2 : 3;
+    if (game.bossesDefeated >= defeatedLabel) return `已击破过 · 后续更强 · ${bossRewardCountForTier(defeatedLabel)} 奖励`;
+    return `后续轮换 · ${bossRewardCountForTier(defeatedLabel)} 奖励`;
+  }
+
+  function bossTree(kind, skill, advice) {
+    const nextTier = game.bossesDefeated + 1;
+    const nextKind = bossKindByTier(nextTier);
+    const tier = kind === nextKind ? nextTier : kind === "ring" ? 1 : kind === "beam" ? 2 : 3;
+    const activeBoss = game.enemies.find((enemy) => enemy.type === "boss" && (enemy.bossKind || bossKindByTier(enemy.bossTier || 1)) === kind);
+    return [
+      { text: `出现：击破数达标后进场，还差 ${Math.max(0, game.nextBossKills - game.kills)} 个`, status: kind === nextKind ? "ready" : "locked" },
+      { text: `技能：${skill}，后面会更快更痛`, status: activeBoss ? "owned" : kind === nextKind ? "ready" : "locked" },
+      { text: `奖励：击破掉 ${bossRewardCountForTier(tier)} 奖励大宝箱`, status: kind === nextKind || activeBoss ? "ready" : "locked" },
+      { text: `打法：${advice}`, status: "ready" },
+      { text: "配合：减速、爆发、护圈或宝箱遗物能放大收益", status: "ready" },
+    ];
+  }
+
   function bossDisplayName(enemy) {
     const tier = Math.max(1, enemy?.bossTier || game.bossesDefeated + 1);
-    const kind = enemy?.bossKind || ["ring", "beam", "storm"][(tier - 1) % 3];
+    const kind = enemy?.bossKind || bossKindByTier(tier);
     const names = {
       ring: "墨环首领",
       beam: "星束首领",
