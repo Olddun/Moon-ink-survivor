@@ -3890,12 +3890,132 @@
   }
 
   function conciseUpgradeEffect(upgrade) {
-    return describeUpgradeEffect(upgrade)
+    const id = upgrade.baseId || upgrade.id;
+    if (upgrade.variantEffect) return "本次：二选一，选后马上生效";
+    const shortEffects = {
+      brush: "本次：飞刃 +1，出手更快",
+      "branch-brush-splinter": "本次：命中后分裂小飞刃",
+      "branch-brush-rain": "本次：攒满后落直线墨雨",
+      orb: "本次：转圈铃 +1，贴身更痛",
+      "branch-orb-recall": "本次：捡经验会召回星纹",
+      "branch-orb-shatter": "本次：命中后裂出碎片",
+      flame: "本次：火圈 +1，烧得更勤",
+      "branch-flame-cinder": "本次：烧死敌人会爆炸",
+      "branch-flame-tide": "本次：拾取脉冲多一圈火潮",
+      frost: "本次：冰线 +1，减速更稳",
+      "branch-frost-echo": "本次：冰线命中裂出小冰线",
+      "branch-frost-lattice": "本次：命中后展开大冰阵",
+      lantern: "本次：追踪光点 +1，拾取更远",
+      "branch-lantern-gleam": "本次：捡经验会爆一圈光",
+      "branch-lantern-vein": "本次：追踪光点会拉出激光",
+      sigil: "本次：直线大光更强",
+      "branch-sigil-echo": "本次：命中后留一片暗场",
+      "branch-sigil-curtain": "本次：命中后折出大激光",
+      jade: "本次：落雷 +1，点杀更稳",
+      needle: "本次：针雨 +1，多打目标",
+      fan: "本次：大扇风 +1，扫出安全区",
+      umbrella: "本次：护身伞 +1，近身更安全",
+      "branch-jade-chain": "本次：落雷会连到旁边敌人",
+      "branch-jade-ward": "本次：落雷后留下大雷区",
+      "branch-needle-curtain": "本次：针雨后追加一排雨帘",
+      "branch-needle-seal": "本次：打慢敌人会炸开雨纹",
+      "branch-fan-gale": "本次：扇风后留下风纹",
+      "branch-fan-feather": "本次：扇风边缘飞出追击羽",
+      "branch-umbrella-lotus": "本次：开伞后留下护身阵",
+      "branch-umbrella-echo": "本次：开伞后追打外圈敌人",
+      "branch-crane-echo": "本次：纸鹤命中后分裂",
+      stride: "本次：跑更快，捡得更远",
+      heart: "本次：血量上限和当前血量提高",
+      focus: "本次：伤害提高；站住会越打越快",
+      "ability-ink-mark": "本次：命中会叠印，4 层爆开",
+      "ability-dew-pulse": "本次：捡经验攒满后放冲击波",
+      "ability-ember": "本次：火焰留下余烬，可二次点燃",
+      "ability-crane-vow": "本次：站定蓄纸鹤，移动时放出",
+      "relic-moon-mirror": "本次：爆印时多射 3 枚月片",
+      "relic-dew-hourglass": "本次：冲击波会加快武器出手",
+      "relic-star-chart": "本次：转圈铃和飞刃互相加速",
+      "relic-red-seal": "本次：受伤后反打回血",
+      "relic-chest-resonance": "本次：开宝箱立刻放冲击波",
+      "relic-lacquer-key": "本次：捡得更远，宝箱帮你攒能量",
+      "relic-branch-inkstone": "本次：分支发动会加快武器",
+      "relic-chest-prism": "本次：宝箱会触发已拥有分支",
+      "relic-focus-lens": "本次：站定更早射大激光，并多射小激光",
+      "relic-route-charm": "本次：以后选路线会立刻爆一圈",
+      "relic-tempo-bell": "本次：慢武器出手时多一圈重响",
+      "evolve-void-brush": "本次：合成超飞刃，立刻清一轮",
+      "evolve-star-river": "本次：合成双层转圈铃，立刻爆一圈",
+      "evolve-moon-lotus": "本次：合成大火莲，立刻双重爆燃",
+      "evolve-frost-zither": "本次：合成大冰琴，立刻打一排",
+      "evolve-rain-loom": "本次：合成大雨网，立刻铺满雨线",
+      "evolve-jade-fan": "本次：合成双层风墙，立刻推开敌人",
+    };
+    return (shortEffects[id] || describeUpgradeEffect(upgrade))
       .replace(/（升至 Lv [^)]+）/g, "")
       .replace(/；本级方向会额外生效/g, "")
       .replace(/解锁\/强化/g, "强化")
-      .replace(/额外/g, "多")
       .trim();
+  }
+
+  function choiceDisplayName(upgrade) {
+    const id = upgrade.baseId || upgrade.id;
+    const names = {
+      brush: "飞刃更多",
+      "branch-brush-splinter": "命中分裂",
+      "branch-brush-rain": "直线墨雨",
+      orb: "转圈铃",
+      "branch-orb-recall": "捡经验召回",
+      "branch-orb-shatter": "命中碎片",
+      flame: "火圈",
+      "branch-flame-cinder": "击杀爆炸",
+      "branch-flame-tide": "拾取火潮",
+      frost: "冰线",
+      "branch-frost-echo": "小冰线",
+      "branch-frost-lattice": "大冰阵",
+      lantern: "追踪光点",
+      "branch-lantern-gleam": "捡经验爆光",
+      "branch-lantern-vein": "追踪激光",
+      sigil: "直线大光",
+      "branch-sigil-echo": "暗场爆发",
+      "branch-sigil-curtain": "大激光",
+      jade: "落雷",
+      needle: "针雨",
+      fan: "大扇风",
+      umbrella: "护身伞",
+      "branch-jade-chain": "连锁雷",
+      "branch-jade-ward": "大雷区",
+      "branch-needle-curtain": "雨帘",
+      "branch-needle-seal": "雨纹爆开",
+      "branch-fan-gale": "风纹",
+      "branch-fan-feather": "追击羽",
+      "branch-umbrella-lotus": "护身阵",
+      "branch-umbrella-echo": "外圈追打",
+      "branch-crane-echo": "纸鹤分裂",
+      stride: "跑得更快",
+      heart: "血更多",
+      focus: "站定大激光",
+      "ability-ink-mark": "4 层爆印",
+      "ability-dew-pulse": "拾取冲击波",
+      "ability-ember": "火焰二次爆",
+      "ability-crane-vow": "站定蓄纸鹤",
+      "relic-moon-mirror": "爆印月片",
+      "relic-dew-hourglass": "冲击波加速",
+      "relic-star-chart": "转圈铃核心",
+      "relic-red-seal": "受伤反打",
+      "relic-chest-resonance": "宝箱冲击波",
+      "relic-lacquer-key": "宝箱充能",
+      "relic-branch-inkstone": "分支加速",
+      "relic-chest-prism": "宝箱触发分支",
+      "relic-focus-lens": "小激光镜",
+      "relic-route-charm": "路线回响",
+      "relic-tempo-bell": "慢武器重响",
+      "evolve-void-brush": "超飞刃",
+      "evolve-star-river": "超转圈铃",
+      "evolve-moon-lotus": "超火莲",
+      "evolve-frost-zither": "超冰琴",
+      "evolve-rain-loom": "超雨网",
+      "evolve-jade-fan": "超风墙",
+    };
+    return names[id] || upgrade.baseName || upgrade.name;
   }
 
   function describeUpgradeSynergy(upgrade) {
@@ -3965,12 +4085,11 @@
       .replace(/^流派：/, "玩法：")
       .replace(/后续看/g, "追")
       .replace(/当前局：/g, "")
-      .replace(/，/g, "，")
       .trim();
     const [head, tail = ""] = text.split("，");
-    if (!tail) return head.length > 30 ? `${head.slice(0, 30)}…` : head;
+    if (!tail) return head.length > 24 ? `${head.slice(0, 24)}…` : head;
     const compact = `${head}，${tail}`;
-    return compact.length > 42 ? `${compact.slice(0, 42)}…` : compact;
+    return compact.length > 30 ? `${compact.slice(0, 30)}…` : compact;
   }
 
   function showUpgrades() {
@@ -3993,7 +4112,7 @@
       card.dataset.type = up.type || "升级";
       const routeOptions = getRouteOptions(up);
       const note = describeChoiceNote(up);
-      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${up.baseName || up.name}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次：2 条路线选 1 条，马上生效。" : conciseUpgradeEffect(up)}</span><span class="choice-synergy">${conciseUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}${note ? `<span class="choice-desc">${note}</span>` : ""}`;
+      card.innerHTML = `<span class="choice-icon mini-glyph" data-glyph="${up.baseId || up.id}" aria-hidden="true"></span><em>${up.type || "升级"}</em><strong>${choiceDisplayName(up)}</strong><span class="choice-level">${formatUpgradeLevel(up)}</span><span class="choice-effect">${routeOptions.length ? "本次：选 1 条路线，马上生效" : conciseUpgradeEffect(up)}</span><span class="choice-synergy">${conciseUpgradeSynergy(up)}</span><span class="choice-fit">${describeUpgradeFit(up)}</span>${renderRouteChoices(up, routeOptions)}${note ? `<span class="choice-desc">${note}</span>` : ""}`;
       const choose = async (upgrade) => {
         if (transitioning) return;
         applyUpgrade(upgrade);
@@ -4037,7 +4156,7 @@
     const archetype = getBuildArchetype(p);
     const routeCount = pool.filter((up) => getRouteOptions(up).length).length;
     const targetNames = [...new Set(pool.map((up) => upgradeBuildTarget(up)?.name || (["遗物", "能力", "超武"].includes(up.type) ? up.type : "通用补强")))].slice(0, 3);
-    ui.upgradePlan.innerHTML = `<span><b>当前主线</b>${archetype.name}</span><span><b>建议下一步</b>${shortNextBuildGoal(p, archetype)}</span><span><b>本轮候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 项二选一` : ""}</span>`;
+    ui.upgradePlan.innerHTML = `<span><b>主线</b>${archetype.name}</span><span><b>下一步</b>${shortNextBuildGoal(p, archetype)}</span><span><b>候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 个二选一` : ""}</span>`;
   }
 
   function showRouteToast(upgrade) {
@@ -4066,7 +4185,7 @@
 
   function renderRouteChoices(upgrade, routes) {
     if (!routes.length) return "";
-    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}" aria-label="${routeAriaLabel(route, routes)}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${plainRouteGoal(route)}</i><em class="route-payoff">${routePayoffHint(route)}</em><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两边都能选；下次升级同一武器还能改。</p></div>`;
+    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}" aria-label="${routeAriaLabel(route, routes)}"><span>${index === 0 ? "路线一" : "路线二"}：${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${plainRouteGoal(route)}</i><em class="route-payoff">${routePayoffHint(route)}</em><small>${shortRouteEffect(route)}</small></button>`).join("")}<p>两边都能选，下次还能改。</p></div>`;
   }
 
   function routeAriaLabel(route, routes) {
@@ -4075,7 +4194,7 @@
 
   function routePickLabel(route) {
     const count = getRoutePickCount(route);
-    return `已选 ${count} 次 · 选后 ${count + 1}`;
+    return `已选 ${count}`;
   }
 
   function routePlainCompare(route, routes) {
@@ -4095,11 +4214,11 @@
 
   function routePayoffHint(route) {
     const text = `${route.routeContrast || ""} ${route.variantEffect || ""} ${route.variantName || ""}`;
-    if (/站定|站住|护圈|近身|反打|被围/.test(text)) return "风险更高，收益会更醒目";
-    if (/低频|发动不多|发动少|触发少|不快|慢|单次|每下|每一下/.test(text)) return "发动少，但每次回报更大";
-    if (/更勤|更快|连续|高频|一直|多落|多劈|多打|额外/.test(text)) return "更常发动，反馈更稳定";
-    if (/拾取|经验|月露|走位/.test(text)) return "边走边捡，越捡越有收益";
-    return "本次选择后马上生效";
+    if (/站定|站住|护圈|近身|反打|被围/.test(text)) return "高风险高收益";
+    if (/低频|发动不多|发动少|触发少|不快|慢|单次|每下|每一下/.test(text)) return "慢，但很痛";
+    if (/更勤|更快|连续|高频|一直|多落|多劈|多打|额外/.test(text)) return "更常发动";
+    if (/拾取|经验|月露|走位/.test(text)) return "越捡越强";
+    return "马上生效";
   }
 
   function getRoutePickCount(route) {
@@ -4110,9 +4229,9 @@
   function describeUpgradeFit(upgrade) {
     const current = getBuildArchetype(game.player);
     const target = upgradeBuildTarget(upgrade);
-    if (!target) return `当前局：主线 ${current.name}；通用补强。`;
-    if (target.id === current.id) return `当前局：主线 ${current.name}；继续强化主线。`;
-    return `当前局：主线 ${current.name}；改走 ${target.name} 副线。`;
+    if (!target) return `主线：${current.name} · 补强`;
+    if (target.id === current.id) return `主线：${current.name} · 继续`;
+    return `主线：${current.name} · 可转 ${target.name}`;
   }
 
   function upgradeBuildTarget(upgrade) {
@@ -4165,7 +4284,7 @@
   }
 
   function plainRouteEffect(effect = "") {
-    return effect
+    const text = effect
       .replace(/^本次：/, "")
       .replace(/走/g, "适合")
       .replace(/流。/g, "玩法。")
@@ -4173,13 +4292,42 @@
       .replace(/冷却/g, "出手间隔")
       .replace(/触发/g, "发动")
       .replace(/收益/g, "好处");
+    return text.length > 34 ? `${text.slice(0, 34)}…` : text;
+  }
+
+  function shortRouteEffect(route) {
+    const id = `${route.baseId || route.id}:${route.variantId}`;
+    const hints = {
+      "brush:swift": "更快铺满屏幕",
+      "brush:pierce": "更痛、更穿透",
+      "orb:orbit": "圈更大，更安全",
+      "orb:tempo": "贴身更痛",
+      "flame:reach": "范围更大",
+      "flame:tempo": "火圈更勤",
+      "frost:long": "冰线更宽",
+      "frost:pulse": "命中攒水波",
+      "lantern:swarm": "光点更多",
+      "lantern:radiance": "单下更痛",
+      "sigil:line": "直线更猛",
+      "sigil:veil": "暗场更强",
+      "jade:fork": "多劈 1 个",
+      "jade:seal": "更痛并减速",
+      "needle:shower": "多落 1 针",
+      "needle:seal": "慢敌更痛",
+      "fan:wide": "扇面更宽",
+      "fan:return": "会折回一次",
+      "umbrella:guard": "护圈更大",
+      "umbrella:spine": "多射伞骨",
+    };
+    if (hints[id]) return hints[id];
+    const text = plainRouteEffect(route.variantEffect || "");
+    return text.length > 16 ? `${text.slice(0, 16)}…` : text;
   }
 
   function describeChoiceNote(upgrade) {
     const text = upgrade.baseDesc || upgrade.desc || "";
     const conditionMatch = text.match(/^(合成：[^。]+。|[^。]+后出现。)/);
     if (conditionMatch) return conditionMatch[1].replace(/^合成：/, "出现条件：").replace(/后出现。$/, "后会加入候选。");
-    if (upgrade.variantId) return "提示：两条路线以后还能改，不会锁死。";
     return "";
   }
 

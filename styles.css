@@ -929,13 +929,13 @@ body[data-game-state="menu"] .route-toast {
   display: grid;
   grid-template-columns: 0.8fr 1.5fr 1fr;
   gap: 8px;
-  margin: 4px 0 14px;
+  margin: 2px 0 12px;
   text-align: left;
 }
 
 .upgrade-plan span {
   min-width: 0;
-  padding: 8px 10px;
+  padding: 7px 9px;
   border: 1px solid rgba(31, 38, 48, 0.1);
   border-left: 4px solid rgba(43, 122, 120, 0.42);
   border-radius: 7px;
@@ -945,7 +945,7 @@ body[data-game-state="menu"] .route-toast {
   color: #4f535a;
   font-size: 10px;
   font-weight: 780;
-  line-height: 1.35;
+  line-height: 1.24;
 }
 
 .upgrade-plan span:nth-child(2) {
@@ -983,8 +983,8 @@ body[data-game-state="menu"] .route-toast {
   --reward-sheen: 10%;
   --reward-frame-gap: 6px;
   position: relative;
-  min-height: 190px;
-  padding: 16px;
+  min-height: 166px;
+  padding: 14px;
   text-align: left;
   color: var(--ink);
   background:
@@ -1084,8 +1084,10 @@ body[data-game-state="menu"] .route-toast {
 
 .choice strong {
   display: block;
-  margin-bottom: 6px;
-  font-size: 17px;
+  margin-bottom: 5px;
+  padding-right: 34px;
+  font-size: 16px;
+  line-height: 1.18;
 }
 
 .choice-level,
@@ -1093,10 +1095,10 @@ body[data-game-state="menu"] .route-toast {
 .choice-synergy,
 .choice-fit {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   border-radius: 7px;
   font-weight: 850;
-  line-height: 1.32;
+  line-height: 1.24;
 }
 
 .choice-level {
@@ -1108,7 +1110,7 @@ body[data-game-state="menu"] .route-toast {
 }
 
 .choice-effect {
-  padding: 7px 9px;
+  padding: 7px 8px;
   border: 1px solid rgba(31, 38, 48, 0.1);
   background: rgba(255, 249, 237, 0.72);
   color: var(--ink);
@@ -1116,22 +1118,22 @@ body[data-game-state="menu"] .route-toast {
 }
 
 .choice-synergy {
-  padding: 6px 8px;
+  padding: 5px 7px;
   border: 1px solid color-mix(in srgb, var(--reward-a) 18%, transparent);
   background:
     linear-gradient(120deg, color-mix(in srgb, var(--reward-a) 10%, transparent), rgba(255, 249, 237, 0.68)),
     rgba(255, 249, 237, 0.62);
   color: #4f535a;
-  font-size: 11px;
+  font-size: 10px;
   box-shadow: inset 0 0 16px color-mix(in srgb, var(--reward-b) 8%, transparent);
 }
 
 .choice-fit {
-  padding: 5px 8px;
+  padding: 4px 7px;
   border: 1px dashed color-mix(in srgb, var(--reward-b) 30%, transparent);
   background: rgba(255, 249, 237, 0.52);
   color: #5b4d32;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .route-compare {
@@ -1139,22 +1141,22 @@ body[data-game-state="menu"] .route-toast {
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  margin: 7px 0 8px;
+  gap: 6px;
+  margin: 6px 0 7px;
 }
 
 .route-compare p {
   grid-column: 1 / -1;
   margin: 0;
   color: #56585d;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 780;
   line-height: 1.28;
 }
 
 .route-option {
-  min-height: 68px;
-  padding: 8px 8px;
+  min-height: 58px;
+  padding: 7px;
   border: 1px solid color-mix(in srgb, var(--reward-a) 30%, transparent);
   border-radius: 7px;
   background:
@@ -1191,15 +1193,15 @@ body[data-game-state="menu"] .route-toast {
 .route-option span {
   display: block;
   color: color-mix(in srgb, var(--reward-a) 72%, var(--ink));
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 950;
   line-height: 1.25;
 }
 
 .route-tag {
   display: inline-block;
-  margin-top: 6px;
-  padding: 3px 6px;
+  margin-top: 5px;
+  padding: 3px 5px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--reward-a) 12%, rgba(255, 249, 237, 0.9));
   color: color-mix(in srgb, var(--reward-a) 66%, var(--ink));
@@ -1211,7 +1213,7 @@ body[data-game-state="menu"] .route-toast {
 
 .route-count {
   display: inline-block;
-  margin-top: 6px;
+  margin-top: 5px;
   margin-right: 5px;
   padding: 3px 6px;
   border: 1px solid color-mix(in srgb, var(--reward-b) 24%, transparent);
@@ -1236,8 +1238,8 @@ body[data-game-state="menu"] .route-toast {
 
 .route-payoff {
   display: inline-block;
-  margin-top: 7px;
-  padding: 4px 7px;
+  margin-top: 5px;
+  padding: 3px 6px;
   border: 1px solid color-mix(in srgb, var(--reward-a) 24%, transparent);
   border-radius: 6px;
   background:
@@ -1252,17 +1254,17 @@ body[data-game-state="menu"] .route-toast {
 
 .route-option small {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: #45494f;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 760;
-  line-height: 1.4;
+  line-height: 1.26;
 }
 
 .choice em {
   display: inline-block;
-  margin-bottom: 8px;
-  padding: 4px 7px;
+  margin-bottom: 6px;
+  padding: 3px 7px;
   border-radius: 999px;
   background: rgba(31, 38, 48, 0.08);
   color: var(--teal);
@@ -2674,9 +2676,9 @@ body[data-game-state="menu"] .route-toast {
   position: relative;
   z-index: 1;
   color: #56585d;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 650;
-  line-height: 1.35;
+  line-height: 1.28;
   opacity: 0.82;
 }
 
