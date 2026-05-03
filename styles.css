@@ -824,6 +824,51 @@ body[data-game-state="menu"] .pause-button {
   padding: 26px;
 }
 
+.upgrade-plan {
+  display: grid;
+  grid-template-columns: 0.8fr 1.5fr 1fr;
+  gap: 8px;
+  margin: 4px 0 14px;
+  text-align: left;
+}
+
+.upgrade-plan span {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(31, 38, 48, 0.1);
+  border-left: 4px solid rgba(43, 122, 120, 0.42);
+  border-radius: 7px;
+  background:
+    linear-gradient(120deg, rgba(43, 122, 120, 0.08), rgba(255, 249, 237, 0.7)),
+    rgba(255, 249, 237, 0.72);
+  color: #4f535a;
+  font-size: 10px;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
+.upgrade-plan span:nth-child(2) {
+  border-left-color: rgba(201, 154, 46, 0.5);
+  background:
+    linear-gradient(120deg, rgba(201, 154, 46, 0.12), rgba(255, 249, 237, 0.7)),
+    rgba(255, 249, 237, 0.72);
+}
+
+.upgrade-plan span:nth-child(3) {
+  border-left-color: rgba(215, 90, 74, 0.42);
+  background:
+    linear-gradient(120deg, rgba(215, 90, 74, 0.09), rgba(255, 249, 237, 0.7)),
+    rgba(255, 249, 237, 0.72);
+}
+
+.upgrade-plan b {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 950;
+}
+
 .choices {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2931,6 +2976,10 @@ body[data-game-state="menu"] .pause-button {
   }
 
   .choices {
+    grid-template-columns: 1fr;
+  }
+
+  .upgrade-plan {
     grid-template-columns: 1fr;
   }
 

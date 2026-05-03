@@ -9,6 +9,7 @@
     chest: document.getElementById("chestOverlay"),
     pause: document.getElementById("pauseOverlay"),
     choices: document.getElementById("upgradeChoices"),
+    upgradePlan: document.getElementById("upgradePlan"),
     chestRewards: document.getElementById("chestRewards"),
     chestTitle: document.getElementById("chestTitle"),
     chestStage: document.getElementById("chestStage"),
@@ -3933,6 +3934,7 @@
   function renderUpgradeChoices(pool) {
     game.choices = pool;
     ui.choices.innerHTML = "";
+    renderUpgradePlan(pool);
     for (const up of pool) {
       const card = document.createElement("div");
       card.className = "choice";
@@ -3978,6 +3980,15 @@
     }
     ui.upgrade.classList.add("visible");
     updateHud();
+  }
+
+  function renderUpgradePlan(pool) {
+    if (!ui.upgradePlan || !game.player) return;
+    const p = game.player;
+    const archetype = getBuildArchetype(p);
+    const routeCount = pool.filter((up) => getRouteOptions(up).length).length;
+    const targetNames = [...new Set(pool.map((up) => upgradeBuildTarget(up)?.name || (["遗物", "能力", "超武"].includes(up.type) ? up.type : "通用补强")))].slice(0, 3);
+    ui.upgradePlan.innerHTML = `<span><b>当前主线</b>${archetype.name}</span><span><b>建议下一步</b>${nextBuildGoal(p, archetype)}</span><span><b>本轮候选</b>${targetNames.join(" / ")}${routeCount ? ` · ${routeCount} 项可二选一改方向` : ""}</span>`;
   }
 
   function getRouteOptions(upgrade) {
