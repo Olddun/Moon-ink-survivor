@@ -274,6 +274,7 @@ async function main() {
           routeCards: buttons.filter((button) => button.querySelectorAll(".route-option").length === 2).length,
           routeText: buttons.map((button) => [...button.querySelectorAll(".route-option")].map((route) => route.textContent || "").join(" / ")).join("|"),
           routeTags: buttons.map((button) => [...button.querySelectorAll(".route-tag")].map((tag) => tag.textContent || "").join(" / ")).join("|"),
+          routePlain: buttons.some((button) => [...button.querySelectorAll(".route-plain")].some((plain) => plain.textContent.includes("这边") && plain.textContent.includes("另一边"))),
           routeHelp: buttons.some((button) => (button.querySelector(".route-compare p")?.textContent || "").includes("两个都能点")),
       }));
     }
@@ -2510,6 +2511,7 @@ async function main() {
     /流派|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
     desktop.choiceStyle.fit &&
     desktop.choiceStyle.fitText.includes("主线") &&
+    desktop.choiceStyle.routePlain &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&

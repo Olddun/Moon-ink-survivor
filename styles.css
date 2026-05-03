@@ -1023,6 +1023,17 @@ body[data-game-state="menu"] .pause-button {
   line-height: 1.1;
 }
 
+.route-plain {
+  display: block;
+  margin-top: 6px;
+  padding-left: 8px;
+  border-left: 2px solid color-mix(in srgb, var(--reward-a) 38%, transparent);
+  color: #3f454d;
+  font-size: 10px;
+  font-weight: 860;
+  line-height: 1.35;
+}
+
 .route-option small {
   display: block;
   margin-top: 6px;
