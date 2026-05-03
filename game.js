@@ -4848,11 +4848,35 @@
   }
 
   function renderEvolutionTree(item, player) {
-    const nodes = typeof item.tree === "function" ? item.tree(player) : item.tree;
+    const baseNodes = typeof item.tree === "function" ? item.tree(player) : item.tree;
+    const nodes = [...(baseNodes || []), ...codexRouteNodes(item, player)];
     if (!nodes?.length) return "";
     return `<div class="evolution-tree" aria-label="${item.name}进化树"><span>进化树</span>${nodes
       .map((node, index) => `<i class="tree-node is-${node.status || "locked"}"><b>${index + 1}</b>${plainTreeText(node.text)}</i>`)
       .join("")}</div>`;
+  }
+
+  function codexRouteNodes(item, player) {
+    const baseId = item.id?.startsWith("weapon-") ? item.id.replace("weapon-", "") : item.id;
+    const variants = upgradeVariants[baseId];
+    if (!variants?.length) return [];
+    const routeKeys = routeModKeys[baseId] || {};
+    const routeOpen = !!item.owned?.(player) || variants.some((variant) => (player.mods[routeKeys[variant.id]] || 0) > 0);
+    const nodes = variants.map((variant, index) => {
+      const count = player.mods[routeKeys[variant.id]] || 0;
+      const other = variants.find((candidate) => candidate.id !== variant.id);
+      const thisSide = plainRouteGoal({ routeContrast: variant.contrast, variantName: variant.name });
+      const otherSide = other ? plainRouteGoal({ routeContrast: other.contrast, variantName: other.name }) : "另一种打法";
+      return {
+        text: `路线${index + 1}：${variant.name} 已选 ${count} 次；这边 ${thisSide}，另一边 ${otherSide}`,
+        status: count > 0 ? "owned" : routeOpen ? "ready" : "locked",
+      };
+    });
+    nodes.push({
+      text: "下次升级仍可改选任一边，不会被上次路线锁住",
+      status: routeOpen ? "ready" : "locked",
+    });
+    return nodes;
   }
 
   function plainTreeText(text = "") {

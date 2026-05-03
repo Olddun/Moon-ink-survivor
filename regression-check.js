@@ -2511,7 +2511,6 @@ async function main() {
     /流派|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
     desktop.choiceStyle.fit &&
     desktop.choiceStyle.fitText.includes("主线") &&
-    desktop.choiceStyle.routePlain &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&
@@ -2586,6 +2585,8 @@ async function main() {
     desktop.codexTree.text.includes("进化树") &&
     desktop.codexTree.text.includes("配合") &&
     desktop.codexTree.text.includes("最终形态") &&
+    desktop.codexTree.text.includes("路线1") &&
+    desktop.codexTree.text.includes("不会被上次路线锁住") &&
     !desktop.codexTree.text.includes("联动：") &&
     desktop.codexTree.text.includes("万象墨锋") &&
     !desktop.codexClosed.visible &&
@@ -2716,6 +2717,8 @@ async function main() {
     desktop.needleOption.routeText.includes("路线二") &&
     desktop.needleOption.routeText.includes("已选") &&
     desktop.needleOption.routeText.includes("选后") &&
+    desktop.needleOption.routeText.includes("这边") &&
+    desktop.needleOption.routeText.includes("另一边") &&
     desktop.needleOption.routeTags.includes("打法：多目标落针") &&
     desktop.needleOption.routeTags.includes("打法：减速增伤") &&
     desktop.needleOption.text.includes("两个都能点") &&
@@ -2736,6 +2739,8 @@ async function main() {
     desktop.fanOption.routeText.includes("回风返场") &&
     desktop.fanOption.routeText.includes("已选") &&
     desktop.fanOption.routeText.includes("选后") &&
+    desktop.fanOption.routeText.includes("这边") &&
+    desktop.fanOption.routeText.includes("另一边") &&
     desktop.fanEffect.level >= 1 &&
     desktop.fanEffect.returnRoute >= 1 &&
     desktop.fanEffect.triggered &&
@@ -2804,6 +2809,8 @@ async function main() {
     desktop.umbrellaOption.routeText.includes("伞骨反刺") &&
     desktop.umbrellaOption.routeText.includes("已选") &&
     desktop.umbrellaOption.routeText.includes("选后") &&
+    desktop.umbrellaOption.routeText.includes("这边") &&
+    desktop.umbrellaOption.routeText.includes("另一边") &&
     desktop.umbrellaOption.effect.includes("2 条路线") &&
     desktop.umbrellaEffect.level >= 1 &&
     desktop.umbrellaEffect.spineRoute >= 1 &&
@@ -2977,7 +2984,7 @@ async function main() {
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
   note("codex", desktop.codexOpen.visible && desktop.codexOpen.summary.includes("武器层级") && desktop.codexOpen.summary.includes("超武/宝箱") && desktop.codexOpen.cards >= 35 && desktop.codexOpen.glyphs === desktop.codexOpen.cards && desktop.codexOpen.trees === desktop.codexOpen.cards && desktop.codexOpen.superFrames.length >= 6 && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-rain-loom") && desktop.codexOpen.superFrames.some((frame) => frame.id === "evolve-jade-fan") && new Set(desktop.codexOpen.superFrames.map((frame) => frame.border)).size >= 5 && new Set(desktop.codexOpen.superFrames.map((frame) => frame.markWidth)).size >= 5 && desktop.codexOpen.superFrames.every((frame) => frame.id.startsWith("evolve-") && frame.inner !== "rgba(0, 0, 0, 0)") && desktop.codexOpen.owned > 0 && desktop.codexOpen.text.includes("万象墨锋") && desktop.codexOpen.text.includes("纸鹤誓约") && desktop.codexOpen.text.includes("墨痕回环") && desktop.codexOpen.text.includes("星移回响") && desktop.codexOpen.text.includes("焰心复燃") && desktop.codexOpen.text.includes("萤露回灯") && desktop.codexOpen.text.includes("霜弦拨月") && desktop.codexOpen.text.includes("墨锋骤雨") && desktop.codexOpen.text.includes("霜弦封阵") && desktop.codexOpen.text.includes("照影折幕") && desktop.codexOpen.text.includes("霜月琴") && desktop.codexOpen.text.includes("清风玉阙") && desktop.codexOpen.text.includes("玉扇裂羽") && desktop.codexOpen.text.includes("墨莲伞") && desktop.codexOpen.text.includes("墨伞莲阵") && desktop.codexOpen.text.includes("伞影回潮"));
-  note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
+  note("codex tree", desktop.codexTree.exists && desktop.codexTree.hiddenBefore && desktop.codexTree.visibleAfter && desktop.codexTree.text.includes("进化树") && desktop.codexTree.text.includes("配合") && desktop.codexTree.text.includes("最终形态") && desktop.codexTree.text.includes("路线1") && desktop.codexTree.text.includes("不会被上次路线锁住") && !desktop.codexTree.text.includes("联动：") && desktop.codexTree.text.includes("万象墨锋") && !desktop.codexClosed.visible);
   note("post combat", desktop.after.level >= 2 && desktop.after.kills > 0 && desktop.after.build.includes("/") && desktop.after.weaponPanel.includes("墨锋") && desktop.after.weaponPanel.includes("Lv") && desktop.after.superBuildFrame.exists && desktop.after.superBuildFrame.id.startsWith("evolve-") && desktop.after.superBuildFrame.markWidth >= 34 && desktop.after.healthText.includes("生命") && desktop.after.healthText.includes("/") && Number(desktop.after.healthAria) > 0 && desktop.healthMeter.text.includes("37 / 120") && desktop.healthMeter.state === "wound" && desktop.healthMeter.ariaNow === "37" && desktop.healthMeter.ariaMax === "120");
   note("umbrella lotus", desktop.umbrellaLotusOption.exists && desktop.umbrellaLotusOption.type === "武器" && desktop.umbrellaLotusOption.text.includes("墨伞莲阵") && desktop.umbrellaLotusOption.effect.includes("短暂阵地") && desktop.umbrellaLotusEffect.level >= 1 && desktop.umbrellaLotusEffect.triggered && desktop.umbrellaLotusEffect.beams >= 5 && desktop.umbrellaLotusEffect.bloom && desktop.umbrellaLotusEffect.inkstoneBloom && desktop.umbrellaLotusEffect.trail && desktop.umbrellaLotusEffect.damaged && desktop.umbrellaLotusEffect.slowed && desktop.umbrellaLotusEffect.dewCharged && desktop.umbrellaLotusEffect.cooldownReduced && desktop.umbrellaLotusEffect.panel.includes("墨伞莲阵"));
   note("umbrella echo", desktop.umbrellaEchoOption.exists && desktop.umbrellaEchoOption.type === "武器" && desktop.umbrellaEchoOption.text.includes("伞影回潮") && desktop.umbrellaEchoOption.effect.includes("追打外圈敌人") && desktop.umbrellaEchoEffect.level >= 1 && desktop.umbrellaEchoEffect.triggered && desktop.umbrellaEchoEffect.beams >= 6 && desktop.umbrellaEchoEffect.bloom && desktop.umbrellaEchoEffect.inkstoneBloom && desktop.umbrellaEchoEffect.trail && desktop.umbrellaEchoEffect.damaged && desktop.umbrellaEchoEffect.slowed && desktop.umbrellaEchoEffect.dewCharged && desktop.umbrellaEchoEffect.cooldownReduced && desktop.umbrellaEchoEffect.panel.includes("伞影回潮"));

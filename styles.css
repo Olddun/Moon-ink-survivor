@@ -2282,8 +2282,9 @@ body[data-game-state="menu"] .pause-button {
 .codex-card:focus-within .evolution-tree,
 .codex-card.tree-open .evolution-tree,
 .codex-card.tree-pinned .evolution-tree {
-  max-height: 260px;
+  max-height: 320px;
   padding: 10px;
+  overflow-y: auto;
   border-color: rgba(201, 154, 46, 0.28);
   box-shadow: 0 18px 38px rgba(31, 38, 48, 0.18);
   opacity: 1;
