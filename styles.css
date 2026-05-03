@@ -1034,6 +1034,22 @@ body[data-game-state="menu"] .pause-button {
   line-height: 1.35;
 }
 
+.route-payoff {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--reward-a) 24%, transparent);
+  border-radius: 6px;
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--reward-a) 12%, transparent), rgba(255, 249, 237, 0.74)),
+    rgba(255, 249, 237, 0.66);
+  color: color-mix(in srgb, var(--reward-a) 62%, #343943);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 930;
+  line-height: 1.25;
+}
+
 .route-option small {
   display: block;
   margin-top: 6px;

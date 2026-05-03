@@ -3968,6 +3968,7 @@
         await choose(up);
       });
       card.addEventListener("keydown", async (event) => {
+        if (event.target.closest?.(".route-option")) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           await choose(up);
@@ -3989,7 +3990,11 @@
 
   function renderRouteChoices(upgrade, routes) {
     if (!routes.length) return "";
-    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><strong class="route-plain">${routePlainCompare(route, routes)}</strong><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>两个都能点；喜欢另一边就直接选另一边，本次升级马上生效。</p></div>`;
+    return `<div class="route-compare" aria-label="路线对比">${routes.map((route, index) => `<button class="route-option ${route.variantId === upgrade.variantId ? "is-selected" : ""}" type="button" data-route-id="${route.variantId}" aria-label="${routeAriaLabel(route, routes)}"><span>${index === 0 ? "路线一" : "路线二"} · ${route.variantName}</span><b class="route-count">${routePickLabel(route)}</b><i class="route-tag">${route.routeContrast || "打法：本次生效"}</i><strong class="route-plain">${routePlainCompare(route, routes)}</strong><em class="route-payoff">${routePayoffHint(route)}</em><small>${plainRouteEffect(route.variantEffect)}</small></button>`).join("")}<p>点这两个小按钮选方向；喜欢另一边就直接点另一边，不会被上次选择锁住。</p></div>`;
+  }
+
+  function routeAriaLabel(route, routes) {
+    return `${route.variantName}，${routePickLabel(route)}。${routePlainCompare(route, routes)}。${routePayoffHint(route)}`;
   }
 
   function routePickLabel(route) {
@@ -4010,6 +4015,15 @@
       .replace(/流/g, "玩法")
       .replace(/更/g, "更")
       .trim();
+  }
+
+  function routePayoffHint(route) {
+    const text = `${route.routeContrast || ""} ${route.variantEffect || ""} ${route.variantName || ""}`;
+    if (/站定|站住|护圈|近身|反打|被围/.test(text)) return "风险更高，收益会更醒目";
+    if (/低频|发动不多|发动少|触发少|不快|慢|单次|每下|每一下/.test(text)) return "发动少，但每次回报更大";
+    if (/更勤|更快|连续|高频|一直|多落|多劈|多打|额外/.test(text)) return "更常发动，反馈更稳定";
+    if (/拾取|经验|月露|走位/.test(text)) return "边走边捡，越捡越有收益";
+    return "本次选择后马上生效";
   }
 
   function getRoutePickCount(route) {

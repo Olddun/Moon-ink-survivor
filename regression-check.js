@@ -275,7 +275,9 @@ async function main() {
           routeText: buttons.map((button) => [...button.querySelectorAll(".route-option")].map((route) => route.textContent || "").join(" / ")).join("|"),
           routeTags: buttons.map((button) => [...button.querySelectorAll(".route-tag")].map((tag) => tag.textContent || "").join(" / ")).join("|"),
           routePlain: buttons.some((button) => [...button.querySelectorAll(".route-plain")].some((plain) => plain.textContent.includes("这边") && plain.textContent.includes("另一边"))),
-          routeHelp: buttons.some((button) => (button.querySelector(".route-compare p")?.textContent || "").includes("两个都能点")),
+          routePayoff: buttons.some((button) => [...button.querySelectorAll(".route-payoff")].some((payoff) => /马上生效|发动少|更常发动|收益/.test(payoff.textContent || ""))),
+          routeAria: buttons.some((button) => [...button.querySelectorAll(".route-option")].every((route) => (route.getAttribute("aria-label") || "").includes("已选") && (route.getAttribute("aria-label") || "").includes("这边"))),
+          routeHelp: buttons.some((button) => (button.querySelector(".route-compare p")?.textContent || "").includes("不会被上次选择锁住")),
       }));
     }
     async function chooseVisibleUpgrade(preferType = "能力") {
@@ -2514,6 +2516,11 @@ async function main() {
     /流派|解锁|遗物|超武|通用/.test(desktop.choiceStyle.synergyText) &&
     desktop.choiceStyle.fit &&
     desktop.choiceStyle.fitText.includes("主线") &&
+    desktop.choiceStyle.routeCards >= 1 &&
+    desktop.choiceStyle.routePlain &&
+    desktop.choiceStyle.routePayoff &&
+    desktop.choiceStyle.routeAria &&
+    desktop.choiceStyle.routeHelp &&
     desktop.sawRelic &&
     desktop.sawSuper &&
     desktop.superChoiceFrame.exists &&
@@ -2727,7 +2734,7 @@ async function main() {
     desktop.needleOption.routeText.includes("另一边") &&
     desktop.needleOption.routeTags.includes("打法：多目标落针") &&
     desktop.needleOption.routeTags.includes("打法：减速增伤") &&
-    desktop.needleOption.text.includes("两个都能点") &&
+    desktop.needleOption.text.includes("不会被上次选择锁住") &&
     desktop.needleEffect.level >= 1 &&
     desktop.needleEffect.triggered &&
     desktop.needleEffect.beams >= 3 &&
