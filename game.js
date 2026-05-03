@@ -7277,6 +7277,10 @@
       return true;
     },
     startBossChallenge,
+    refreshHud() {
+      updateHud();
+      draw();
+    },
     gainXp,
     showUpgrades() {
       if (ui.chest.classList.contains("visible")) {

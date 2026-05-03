@@ -764,22 +764,22 @@ async function main() {
       text: document.querySelector("#codexGrid").textContent,
     }));
     const codexTreeBefore = await page.evaluate(() => {
-      const card = [...document.querySelectorAll(".codex-card")].find((node) => node.textContent.includes("墨锋加密"));
+      const card = document.querySelector('.codex-card[data-id="weapon-brush"]');
       const tree = card?.querySelector(".evolution-tree");
       return {
         exists: !!tree,
         hiddenBefore: tree ? getComputedStyle(tree).maxHeight === "0px" : false,
       };
     });
-    const brushCodexCard = page.locator(".codex-card").filter({ hasText: "墨锋加密" });
+    const brushCodexCard = page.locator('.codex-card[data-id="weapon-brush"]');
     if ((await brushCodexCard.count()) === 1) {
-      await brushCodexCard.hover();
+      await brushCodexCard.focus();
       await page.waitForTimeout(320);
     } else {
       errors.push("brush codex card was not unique");
     }
     const codexTree = await page.evaluate(() => {
-      const card = [...document.querySelectorAll(".codex-card")].find((node) => node.textContent.includes("墨锋加密"));
+      const card = document.querySelector('.codex-card[data-id="weapon-brush"]');
       const tree = card?.querySelector(".evolution-tree");
       const style = tree ? getComputedStyle(tree) : null;
       return {
@@ -800,35 +800,38 @@ async function main() {
       await page.waitForTimeout(1050);
     }
 
-    const after = await page.evaluate(() => ({
-      time: document.querySelector("#timeText").textContent,
-      level: Number(document.querySelector("#levelText").textContent),
-      kills: Number(document.querySelector("#killText").textContent),
-      build: document.querySelector("#buildText").textContent,
-      weaponPanel: document.querySelector("#weaponBuildPanel").textContent,
-      relicPanel: document.querySelector("#relicBuildPanel").textContent,
-      traitPanel: document.querySelector("#traitBuildPanel").textContent,
-      buildPanelIcons: document.querySelectorAll(".build-panel .mini-glyph").length,
-      upgradeVisible: document.querySelector("#upgradeOverlay").classList.contains("visible"),
-      gameOverVisible: document.querySelector("#gameOverOverlay").classList.contains("visible"),
-      canvasBytes: document.querySelector("canvas").toDataURL().length,
-      health: document.querySelector("#healthBar").style.width,
-      healthText: document.querySelector("#healthText").textContent,
-      healthAria: document.querySelector(".bar.health").getAttribute("aria-valuenow"),
-      superBuildFrame: (() => {
-        const el = document.querySelector('#weaponBuildPanel .build-chip[data-type="超武"]');
-        if (!el) return { exists: false };
-        const style = getComputedStyle(el);
-        const after = getComputedStyle(el, "::after");
-        return {
-          exists: true,
-          id: el.dataset.id || "",
-          border: style.borderTopColor,
-          shadow: style.boxShadow,
-          markWidth: parseFloat(after.width),
-        };
-      })(),
-    }));
+    const after = await page.evaluate(() => {
+      window.__moonSurvivorDebug.refreshHud();
+      return {
+        time: document.querySelector("#timeText").textContent,
+        level: Number(document.querySelector("#levelText").textContent),
+        kills: Number(document.querySelector("#killText").textContent),
+        build: document.querySelector("#buildText").textContent,
+        weaponPanel: document.querySelector("#weaponBuildPanel").textContent,
+        relicPanel: document.querySelector("#relicBuildPanel").textContent,
+        traitPanel: document.querySelector("#traitBuildPanel").textContent,
+        buildPanelIcons: document.querySelectorAll(".build-panel .mini-glyph").length,
+        upgradeVisible: document.querySelector("#upgradeOverlay").classList.contains("visible"),
+        gameOverVisible: document.querySelector("#gameOverOverlay").classList.contains("visible"),
+        canvasBytes: document.querySelector("canvas").toDataURL().length,
+        health: document.querySelector("#healthBar").style.width,
+        healthText: document.querySelector("#healthText").textContent,
+        healthAria: document.querySelector(".bar.health").getAttribute("aria-valuenow"),
+        superBuildFrame: (() => {
+          const el = document.querySelector('#weaponBuildPanel .build-chip[data-type="超武"]');
+          if (!el) return { exists: false };
+          const style = getComputedStyle(el);
+          const afterStyle = getComputedStyle(el, "::after");
+          return {
+            exists: true,
+            id: el.dataset.id || "",
+            border: style.borderTopColor,
+            shadow: style.boxShadow,
+            markWidth: parseFloat(afterStyle.width),
+          };
+        })(),
+      };
+    });
 
     await page.evaluate(() => {
       const debug = window.__moonSurvivorDebug;
