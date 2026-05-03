@@ -265,6 +265,104 @@ async function main() {
       };
     });
 
+    const bossEncounter = await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      const { game, player } = debug;
+      const snapshot = {
+        kills: game.kills,
+        bossSpawned: game.bossSpawned,
+        bossesDefeated: game.bossesDefeated,
+        nextBossKills: game.nextBossKills,
+        hp: player.hp,
+        invuln: player.invuln,
+        enemies: [...game.enemies],
+        chests: [...game.chests],
+        gems: [...game.gems],
+      };
+      game.enemies.length = 0;
+      game.chests.length = 0;
+      game.gems.length = 0;
+      game.bossSpawned = false;
+      game.bossesDefeated = 0;
+      game.nextBossKills = 2;
+      game.kills = 1;
+      player.hp = player.maxHp;
+      player.invuln = 0;
+      const fodder = { x: player.x + 58, y: player.y, r: 13, hp: 1, maxHp: 1, dmg: 0, xp: 0, speed: 0, color: "#3d4652", phase: 0, type: "shade", hit: 0, slow: 0 };
+      game.enemies.push(fodder);
+      debug.triggerInkBurst(fodder.x, fodder.y, 40, 999);
+      const first = debug.maybeSpawnBoss();
+      const firstBeforeHp = player.hp;
+      const beforeBlooms = game.blooms.length;
+      const beforeBeams = game.beams.length;
+      if (first) {
+        first.x = player.x + 36;
+        first.y = player.y;
+        player.invuln = 0;
+        debug.triggerBossSkill(first);
+      }
+      const firstSkill = {
+        hpLost: player.hp < firstBeforeHp,
+        blooms: game.blooms.length - beforeBlooms,
+        beams: game.beams.length - beforeBeams,
+        kind: first?.bossKind || "",
+        tier: first?.bossTier || 0,
+        cooldown: first?.skillCooldown || 0,
+      };
+      if (first) debug.triggerInkBurst(first.x, first.y, 220, 999999);
+      const nextTarget = game.nextBossKills;
+      game.kills = nextTarget;
+      player.hp = player.maxHp;
+      player.invuln = 0;
+      const second = debug.maybeSpawnBoss();
+      const beforeSecondBeams = game.beams.length;
+      const beforeSecondBlooms = game.blooms.length;
+      if (second) {
+        second.x = player.x + 72;
+        second.y = player.y;
+        debug.triggerBossSkill(second);
+      }
+      const secondSkill = {
+        tier: second?.bossTier || 0,
+        kind: second?.bossKind || "",
+        beams: game.beams.length - beforeSecondBeams,
+        blooms: game.blooms.length - beforeSecondBlooms,
+        cooldown: second?.skillCooldown || 0,
+      };
+      const activeName = second ? debug.bossDisplayName(second) : "";
+      const killTriggered = game.kills >= 2;
+      const bossDefeated = game.bossesDefeated >= 1;
+      player.hp = snapshot.hp;
+      player.invuln = snapshot.invuln;
+      game.kills = snapshot.kills;
+      game.bossSpawned = snapshot.bossSpawned;
+      game.bossesDefeated = snapshot.bossesDefeated;
+      game.nextBossKills = snapshot.nextBossKills;
+      game.enemies.length = 0;
+      game.enemies.push(...snapshot.enemies);
+      game.chests.length = 0;
+      game.chests.push(...snapshot.chests);
+      game.gems.length = 0;
+      game.gems.push(...snapshot.gems);
+      return {
+        killTriggered,
+        firstSpawned: !!first,
+        firstTier: firstSkill.tier,
+        firstKind: firstSkill.kind,
+        firstSkillVisible: firstSkill.blooms > 0 || firstSkill.beams > 0,
+        firstSkillThreat: firstSkill.hpLost,
+        bossDefeated,
+        nextTarget,
+        nextTargetAdvanced: nextTarget > 2,
+        secondSpawned: !!second,
+        secondTier: secondSkill.tier,
+        secondKind: secondSkill.kind,
+        secondSkillVisible: secondSkill.blooms > 0 || secondSkill.beams > 0,
+        secondStronger: secondSkill.tier > firstSkill.tier && secondSkill.cooldown > 0 && secondSkill.cooldown <= firstSkill.cooldown,
+        activeName,
+      };
+    });
+
     let upgraded = false;
     let sawAbility = false;
     let sawRelic = false;
@@ -2418,7 +2516,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, escPauseOpened, escPauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, escPauseOpened, escPauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, bossEncounter, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2560,6 +2658,19 @@ async function main() {
     desktop.routeFeedbackFx.damaged &&
     desktop.routeFeedbackFx.slowed &&
     desktop.routeFeedbackFx.dewCharged &&
+    desktop.bossEncounter.killTriggered &&
+    desktop.bossEncounter.firstSpawned &&
+    desktop.bossEncounter.firstTier === 1 &&
+    desktop.bossEncounter.firstSkillVisible &&
+    desktop.bossEncounter.firstSkillThreat &&
+    desktop.bossEncounter.bossDefeated &&
+    desktop.bossEncounter.nextTargetAdvanced &&
+    desktop.bossEncounter.secondSpawned &&
+    desktop.bossEncounter.secondTier === 2 &&
+    desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind &&
+    desktop.bossEncounter.secondSkillVisible &&
+    desktop.bossEncounter.secondStronger &&
+    desktop.bossEncounter.activeName.includes("首领") &&
     desktop.upgraded &&
     desktop.sawAbility &&
     desktop.choiceStyle.colored &&
@@ -3057,6 +3168,7 @@ async function main() {
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
+  note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.activeName.includes("首领"));
   note("run goal", desktop.buildPanelsInitial.goalText.includes("盼头") && /前期求生|中期成型|成型清场|极限挑战/.test(desktop.buildPanelsInitial.goalText) && /月露|宝箱|Boss|超武|精英/.test(desktop.buildPanelsInitial.goalText));
   note("route toast", desktop.routeToast.visible && desktop.routeToast.text.includes("已改方向") && desktop.routeToast.text.includes("雨墨针") && /马上生效|更常发动|高风险|慢，但很痛/.test(desktop.routeToast.text));
   note("route memory", desktop.routeMemory.exists && desktop.routeMemory.text.includes("刚选路线") && desktop.routeMemory.text.includes("雨墨针") && desktop.routeMemory.text.includes("已生效") && desktop.routeMemory.text.includes("仍可改另一边") && desktop.routeMemory.thumbLabel.includes("刚选路线"));

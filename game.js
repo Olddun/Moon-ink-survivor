@@ -204,6 +204,8 @@
     spawnTimer: 0,
     eliteTimer: 28,
     bossSpawned: false,
+    nextBossKills: 25,
+    bossesDefeated: 0,
     player: null,
     enemies: [],
     projectiles: [],
@@ -1650,6 +1652,8 @@
     game.spawnTimer = 0;
     game.eliteTimer = 24;
     game.bossSpawned = false;
+    game.nextBossKills = 25;
+    game.bossesDefeated = 0;
     game.enemies = [];
     game.projectiles = [];
     game.trails = [];
@@ -2036,26 +2040,46 @@
 
     const t = game.time;
     const hpScale = 1 + t / 85 + game.wave * 0.08;
+    const bossTier = boss ? game.bossesDefeated + 1 : 0;
     const typeRoll = Math.random();
     const type = boss ? "boss" : elite ? "elite" : typeRoll > 0.78 ? "swift" : typeRoll > 0.55 ? "bloom" : "shade";
+    const bossKind = boss ? ["ring", "beam", "storm"][(bossTier - 1) % 3] : "";
     const stats = {
       shade: { r: 17, hp: 20 * hpScale, speed: 76 + game.wave * 3, dmg: 11, xp: 1, color: palette.softInk },
       swift: { r: 13, hp: 14 * hpScale, speed: 122 + game.wave * 3, dmg: 8, xp: 1, color: palette.coral },
       bloom: { r: 22, hp: 34 * hpScale, speed: 54 + game.wave * 2, dmg: 16, xp: 2, color: palette.moss },
       elite: { r: 29, hp: 145 * hpScale, speed: 72 + game.wave * 2, dmg: 24, xp: 10, color: palette.lilac },
-      boss: { r: 48, hp: 620 * hpScale, speed: 56, dmg: 36, xp: 35, color: palette.ink },
+      boss: {
+        r: 48 + Math.min(16, bossTier * 3),
+        hp: (520 + bossTier * 230) * hpScale,
+        speed: Math.max(42, 58 - bossTier * 2),
+        dmg: 30 + bossTier * 5,
+        xp: 28 + bossTier * 10,
+        color: bossKind === "beam" ? palette.lilac : bossKind === "storm" ? palette.gold : palette.ink,
+      },
     }[type];
 
-    game.enemies.push({
+    const enemy = {
       ...stats,
       x,
       y,
       type,
+      bossTier,
+      bossKind,
+      skillTimer: boss ? Math.max(1.15, 2.7 - bossTier * 0.18) : 0,
+      skillCooldown: boss ? Math.max(1.15, 3.2 - bossTier * 0.16) : 0,
       maxHp: stats.hp,
       hit: 0,
       slow: 0,
       phase: rand(0, Math.PI * 2),
-    });
+    };
+    game.enemies.push(enemy);
+    if (boss) {
+      game.blooms.push({ x, y, r: 18, max: 170 + bossTier * 18, life: 0.7, color: enemy.color, kind: "bossSpawn", bossKind });
+      spawnParticles(x, y, enemy.color, 34 + bossTier * 6);
+      shake = Math.max(shake, 8 + bossTier * 2);
+    }
+    return enemy;
   }
 
   function spawnGem(x, y, value) {
@@ -3604,6 +3628,8 @@
     }
     if (enemy.type === "boss") {
       game.bossSpawned = false;
+      game.bossesDefeated += 1;
+      game.nextBossKills = game.kills + 28 + game.bossesDefeated * 16;
       game.eliteTimer = 8;
     }
   }
@@ -4588,10 +4614,15 @@
       game.eliteTimer = 30 + rand(8, 16);
       spawnEnemy(false, true);
     }
-    if (game.time > 135 && !game.bossSpawned) {
+    maybeSpawnBoss();
+  }
+
+  function maybeSpawnBoss() {
+    if (!game.bossSpawned && game.kills >= game.nextBossKills) {
       game.bossSpawned = true;
-      spawnEnemy(false, false, true);
+      return spawnEnemy(false, false, true);
     }
+    return null;
   }
 
   function updateEnemies(dt) {
@@ -4600,22 +4631,96 @@
       e.hit = Math.max(0, e.hit - dt);
       e.slow = Math.max(0, e.slow - dt);
       e.starShardCooldown = Math.max(0, (e.starShardCooldown || 0) - dt);
+      if (e.type === "boss") {
+        e.skillTimer = Math.max(0, (e.skillTimer || 0) - dt);
+        if (e.skillTimer <= 0) {
+          triggerBossSkill(e);
+          e.skillTimer = Math.max(0.95, (e.skillCooldown || 3) - Math.min(0.55, (e.hp / Math.max(1, e.maxHp) < 0.45 ? 0.38 : 0)));
+        }
+      }
       const a = angleTo(e, p);
       const sway = Math.sin(game.time * 2 + e.phase) * 0.34;
-      const speed = e.speed * (e.slow > 0 ? 0.55 : 1);
+      const speed = e.speed * (e.slow > 0 ? 0.55 : 1) * (e.type === "boss" ? 0.82 : 1);
       e.x += Math.cos(a + sway * 0.18) * speed * dt;
       e.y += Math.sin(a + sway * 0.18) * speed * dt;
       e.x = clamp(e.x, 18, world.w - 18);
       e.y = clamp(e.y, 18, world.h - 18);
       const d = dist(e, p);
       if (d < e.r + p.r && p.invuln <= 0) {
-        p.hp -= e.dmg;
-        p.invuln = 0.68;
-        if (p.relics.redSeal) p.redSealReady = true;
-        shake = 9;
-        spawnParticles(p.x, p.y, palette.coral, 16);
+        damagePlayer(e.dmg, e.color, e.type === "boss" ? 20 : 16);
       }
     }
+  }
+
+  function damagePlayer(amount, color = palette.coral, particles = 16) {
+    const p = game.player;
+    if (!p || p.invuln > 0) return false;
+    p.hp -= amount;
+    p.invuln = 0.68;
+    if (p.relics.redSeal) p.redSealReady = true;
+    shake = Math.max(shake, amount >= 30 ? 13 : 9);
+    spawnParticles(p.x, p.y, color, particles);
+    return true;
+  }
+
+  function triggerBossSkill(enemy) {
+    if (!enemy || enemy.type !== "boss") return false;
+    const tier = Math.max(1, enemy.bossTier || 1);
+    const kind = enemy.bossKind || "ring";
+    if (kind === "beam") return triggerBossBeam(enemy, tier);
+    if (kind === "storm") return triggerBossStorm(enemy, tier);
+    return triggerBossRing(enemy, tier);
+  }
+
+  function triggerBossRing(enemy, tier) {
+    const p = game.player;
+    const radius = 128 + tier * 24;
+    game.blooms.push({ x: enemy.x, y: enemy.y, r: 16, max: radius, life: 0.58, color: palette.coral, kind: "bossRing" });
+    game.blooms.push({ x: enemy.x, y: enemy.y, r: radius * 0.32, max: radius * 0.52, life: 0.28, color: palette.gold, kind: "bossWarn" });
+    spawnParticles(enemy.x, enemy.y, palette.coral, 14 + tier * 3);
+    if (dist(enemy, p) < radius + p.r) damagePlayer(13 + tier * 4, palette.coral, 18 + tier);
+    shake = Math.max(shake, 5 + tier);
+    return true;
+  }
+
+  function triggerBossBeam(enemy, tier) {
+    const p = game.player;
+    const spokes = Math.min(12, 4 + tier * 2);
+    const length = 240 + tier * 28;
+    const start = angleTo(enemy, p) + game.time * 0.08;
+    let hit = false;
+    for (let i = 0; i < spokes; i += 1) {
+      const a = start + (i / spokes) * Math.PI * 2;
+      const x2 = enemy.x + Math.cos(a) * length;
+      const y2 = enemy.y + Math.sin(a) * length;
+      game.beams.push({ x1: enemy.x, y1: enemy.y, x2, y2, life: 0.28, maxLife: 0.28, width: 4 + tier * 0.45, color: palette.lilac });
+      const lineDist = pointLineDistance(p.x, p.y, enemy.x, enemy.y, x2, y2);
+      const along = ((p.x - enemy.x) * (x2 - enemy.x) + (p.y - enemy.y) * (y2 - enemy.y)) / Math.max(1, length * length);
+      if (along >= -0.04 && along <= 1.04 && lineDist < p.r + 9 + tier) hit = true;
+    }
+    game.blooms.push({ x: enemy.x, y: enemy.y, r: 20, max: 96 + tier * 16, life: 0.36, color: palette.lilac, kind: "bossBeam" });
+    if (hit) damagePlayer(11 + tier * 3, palette.lilac, 16 + tier);
+    shake = Math.max(shake, 4 + tier);
+    return true;
+  }
+
+  function triggerBossStorm(enemy, tier) {
+    const p = game.player;
+    const strikes = Math.min(7, 2 + tier);
+    let hit = false;
+    for (let i = 0; i < strikes; i += 1) {
+      const a = i === 0 ? 0 : rand(0, Math.PI * 2);
+      const radius = i === 0 ? rand(12, 34) : rand(54, 170 + tier * 12);
+      const x = clamp(p.x + Math.cos(a) * radius, 40, world.w - 40);
+      const y = clamp(p.y + Math.sin(a) * radius, 40, world.h - 40);
+      const strikeRadius = 42 + tier * 6;
+      game.blooms.push({ x, y, r: 10, max: strikeRadius, life: 0.48, color: palette.gold, kind: "bossStorm" });
+      game.beams.push({ x1: x, y1: y - 150 - tier * 12, x2: x, y2: y + 22, life: 0.22, maxLife: 0.22, width: 3.6 + tier * 0.4, color: palette.gold });
+      if (Math.hypot(p.x - x, p.y - y) < p.r + strikeRadius * 0.72) hit = true;
+    }
+    if (hit) damagePlayer(10 + tier * 3, palette.gold, 18 + tier);
+    shake = Math.max(shake, 5 + tier);
+    return true;
   }
 
   function updateWeapons(dt) {
@@ -4890,7 +4995,7 @@
     ui.xpText.textContent = `${p.xp} / ${p.nextXp}`;
     ui.killText.textContent = game.kills;
     ui.buildText.textContent = `${game.abilityPickups}/${game.relicPickups}/${game.evolutionPickups}`;
-    ui.runSubtitle.textContent = `第 ${game.wave} 潮`;
+    ui.runSubtitle.textContent = game.bossSpawned ? `Boss ${game.bossesDefeated + 1} 压场` : `第 ${game.wave} 潮`;
     renderRunGoal(p);
     ui.healthBar.style.width = `${hpPercent}%`;
     ui.healthText.textContent = `生命 ${hpNow} / ${hpMax} · ${Math.round(hpPercent)}%`;
@@ -4919,13 +5024,28 @@
     const ready = readyEvolutionNames(p);
     if (ready.length) return `超武已备：${ready[0]}。下次升级优先拿，马上会有专属爆发。`;
     if (game.chests.length) return `场上有 ${game.chests.length} 个宝箱，去捡月匣拿 1/3/5 个奖励。`;
+    const activeBoss = game.enemies.find((enemy) => enemy.type === "boss");
+    if (activeBoss) return `Boss ${bossDisplayName(activeBoss)} 正在压场；击破必掉大宝箱。`;
+    const bossKills = Math.max(0, game.nextBossKills - game.kills);
+    if (bossKills <= 8) return `再击破 ${bossKills} 个敌人，下一只 Boss 带大宝箱进场。`;
     const needXp = Math.max(0, p.nextXp - p.xp);
     if (needXp <= 3) return `还差 ${needXp} 点月露升级，马上三选一。`;
     const next = nextEvolutionHint(p);
     if (next.ready > 0) return `追超武：${next.text}`;
-    if (!game.bossSpawned && game.time < 135) return `${formatTime(135 - game.time)} 后 Boss 带月匣进场；先补主路线和保命。`;
+    if (!game.bossSpawned) return `还差 ${bossKills} 个击破触发 Boss；先补主路线和保命。`;
     const eliteIn = Math.max(1, Math.ceil(game.eliteTimer));
     return `${eliteIn} 秒后精英逼近；击破大概率掉宝箱。`;
+  }
+
+  function bossDisplayName(enemy) {
+    const tier = Math.max(1, enemy?.bossTier || game.bossesDefeated + 1);
+    const kind = enemy?.bossKind || ["ring", "beam", "storm"][(tier - 1) % 3];
+    const names = {
+      ring: "墨环首领",
+      beam: "星束首领",
+      storm: "雷雨首领",
+    };
+    return `${tier} · ${names[kind] || "月匣首领"}`;
   }
 
   function readyEvolutionNames(p) {
@@ -5438,19 +5558,41 @@
       petalShape(e.r, e.r * 0.92, 6);
     } else if (e.type === "elite" || e.type === "boss") {
       petalShape(e.r, e.r, e.type === "boss" ? 8 : 7);
-      ctx.strokeStyle = palette.gold;
+      ctx.strokeStyle = e.type === "boss" && e.bossKind === "beam" ? palette.lilac : palette.gold;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(0, 0, e.r * 0.68, 0, Math.PI * 2);
       ctx.stroke();
+      if (e.type === "boss") {
+        ctx.save();
+        ctx.rotate(-game.time * (e.bossKind === "storm" ? 0.55 : 0.26));
+        ctx.strokeStyle = e.bossKind === "ring" ? palette.coral : e.bossKind === "beam" ? palette.white : palette.gold;
+        ctx.globalAlpha = 0.76;
+        ctx.lineWidth = 2;
+        const marks = e.bossKind === "storm" ? 6 : e.bossKind === "beam" ? 4 : 8;
+        for (let i = 0; i < marks; i += 1) {
+          ctx.rotate((Math.PI * 2) / marks);
+          ctx.beginPath();
+          ctx.moveTo(e.r * 0.42, 0);
+          ctx.lineTo(e.r * 0.88, 0);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
     } else {
       leaf(0, 0, e.r * 1.45, e.r * 1.2, 0);
     }
     if (e.type === "elite" || e.type === "boss") {
       ctx.fillStyle = "rgba(31, 38, 48, 0.16)";
-      ctx.fillRect(-e.r, -e.r - 13, e.r * 2, 4);
+      ctx.fillRect(-e.r, -e.r - 13, e.r * 2, e.type === "boss" ? 6 : 4);
       ctx.fillStyle = palette.coral;
-      ctx.fillRect(-e.r, -e.r - 13, e.r * 2 * Math.max(0, e.hp / e.maxHp), 4);
+      ctx.fillRect(-e.r, -e.r - 13, e.r * 2 * Math.max(0, e.hp / e.maxHp), e.type === "boss" ? 6 : 4);
+      if (e.type === "boss") {
+        ctx.fillStyle = palette.ink;
+        ctx.font = "700 10px ui-sans-serif, system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText(`B${e.bossTier || 1}`, 0, -e.r - 20);
+      }
     }
     if (e.marks > 0) {
       ctx.strokeStyle = palette.teal;
@@ -6185,6 +6327,38 @@
         ctx.stroke();
       } else {
         ctx.strokeRect(-r * 0.3, -r * 0.3, r * 0.6, r * 0.6);
+      }
+      ctx.restore();
+    }
+    if (bloom.kind === "bossSpawn" || bloom.kind === "bossWarn" || bloom.kind === "bossRing" || bloom.kind === "bossBeam" || bloom.kind === "bossStorm") {
+      ctx.save();
+      ctx.translate(bloom.x, bloom.y);
+      const bossKind = bloom.bossKind || (bloom.kind === "bossStorm" ? "storm" : bloom.kind === "bossBeam" ? "beam" : "ring");
+      ctx.rotate(game.time * (bossKind === "storm" ? 0.72 : bossKind === "beam" ? -0.48 : 0.38));
+      ctx.strokeStyle = bloom.color;
+      ctx.globalAlpha *= bloom.kind === "bossWarn" ? 0.54 : 0.82;
+      ctx.lineWidth = bloom.kind === "bossWarn" ? 2 : 3;
+      const spokes = bossKind === "storm" ? 6 : bossKind === "beam" ? 4 : 8;
+      for (let i = 0; i < spokes; i += 1) {
+        ctx.rotate((Math.PI * 2) / spokes);
+        ctx.beginPath();
+        ctx.moveTo(r * 0.18, 0);
+        ctx.lineTo(r * (bossKind === "beam" ? 0.9 : 0.72), 0);
+        ctx.stroke();
+      }
+      if (bossKind === "beam") {
+        ctx.strokeRect(-r * 0.38, -r * 0.38, r * 0.76, r * 0.76);
+      } else if (bossKind === "storm") {
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.34, -r * 0.58);
+        ctx.lineTo(r * 0.06, -r * 0.08);
+        ctx.lineTo(-r * 0.08, -r * 0.08);
+        ctx.lineTo(r * 0.36, r * 0.58);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.58, 0, Math.PI * 2);
+        ctx.stroke();
       }
       ctx.restore();
     }
@@ -6956,6 +7130,10 @@
     triggerUmbrellaLotus,
     triggerUmbrellaEcho,
     triggerStandingLaser,
+    triggerBossSkill,
+    maybeSpawnBoss,
+    spawnEnemy,
+    bossDisplayName,
     triggerCharacterTrait,
     triggerCraneEcho,
     triggerFrostEcho,
