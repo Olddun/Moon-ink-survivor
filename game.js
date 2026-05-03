@@ -20,6 +20,7 @@
     codexGrid: document.getElementById("codexGrid"),
     codexSummary: document.getElementById("codexSummary"),
     characterSelect: document.getElementById("characterSelect"),
+    bossChallengeSelect: document.getElementById("bossChallengeSelect"),
     startButton: document.getElementById("startButton"),
     pauseButton: document.getElementById("pauseButton"),
     resumeButton: document.getElementById("resumeButton"),
@@ -183,6 +184,14 @@
     },
   ];
 
+  const bossChallengeKinds = [
+    { kind: "ring", name: "墨环首领", desc: "大圈压场，考验走位和安全距离。" },
+    { kind: "beam", name: "星束首领", desc: "多道光束切场，考验缝隙移动。" },
+    { kind: "storm", name: "雷雨首领", desc: "追身落雷，考验持续移动。" },
+  ];
+
+  const bossChallengeTiers = [1, 2, 3, 4, 5, 6];
+
   const keys = new Set();
   const pointer = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
   const world = { w: 2800, h: 2200 };
@@ -193,6 +202,8 @@
   let shake = 0;
   let transitioning = false;
   let selectedCharacterId = "wanderer";
+  let selectedBossChallengeKind = "ring";
+  let selectedBossChallengeTier = 1;
   let pauseReturnState = "playing";
   let codexReturnState = null;
   let routeToastTimer = null;
@@ -224,6 +235,8 @@
     chestsOpened: 0,
     picks: [],
     lastVariant: "",
+    testBossOverride: null,
+    testChallenge: null,
   };
 
   const upgradeCaps = {
@@ -1706,6 +1719,8 @@
     game.chestsOpened = 0;
     game.picks = [];
     game.lastVariant = "";
+    game.testBossOverride = null;
+    game.testChallenge = null;
     hideRouteToast();
     game.player = {
       x: world.w / 2,
@@ -1880,6 +1895,33 @@
         <span class="character-stats">${character.stats.map((stat) => `<b>${stat}</b>`).join("")}</span>
       </button>`;
     }).join("");
+    renderBossChallengeSelect();
+  }
+
+  function renderBossChallengeSelect() {
+    if (!ui.bossChallengeSelect) return;
+    const currentKind = bossChallengeKinds.find((boss) => boss.kind === selectedBossChallengeKind) || bossChallengeKinds[0];
+    ui.bossChallengeSelect.innerHTML = `
+      <div class="boss-test-header">
+        <span>测试模式</span>
+        <b>${currentKind.name} · ${selectedBossChallengeTier} 阶</b>
+      </div>
+      <div class="boss-test-bosses" role="radiogroup" aria-label="选择 Boss">
+        ${bossChallengeKinds.map((boss) => `<button class="boss-test-chip" type="button" role="radio" aria-checked="${boss.kind === selectedBossChallengeKind}" data-boss-kind="${boss.kind}" data-selected="${boss.kind === selectedBossChallengeKind}">
+          <span class="mini-glyph" data-glyph="boss-${boss.kind}" aria-hidden="true"></span>
+          <b>${boss.name}</b>
+          <small>${boss.desc}</small>
+        </button>`).join("")}
+      </div>
+      <div class="boss-test-tiers" role="radiogroup" aria-label="选择 Boss 强度">
+        ${bossChallengeTiers.map((tier) => `<button type="button" role="radio" aria-checked="${tier === selectedBossChallengeTier}" data-boss-tier="${tier}" data-selected="${tier === selectedBossChallengeTier}">${tier} 阶</button>`).join("")}
+      </div>
+      <div class="boss-test-actions">
+        <button id="bossDirectButton" type="button" data-boss-start="direct">直接挑战</button>
+        <button id="bossDraftButton" type="button" data-boss-start="draft">先选 6 次技能</button>
+      </div>
+      <p>用当前角色开局，只生成选中的 Boss；适合快速测技能、路线和首领强度。</p>
+    `;
   }
 
   function playPageTransition(onCovered) {
@@ -1945,6 +1987,75 @@
     if (!changed) return;
     last = performance.now();
     requestAnimationFrame(loop);
+  }
+
+  async function startBossChallenge(prepChoices = 0) {
+    if (transitioning || state !== "menu") return false;
+    const bossKind = selectedBossChallengeKind;
+    const bossTier = selectedBossChallengeTier;
+    state = "transition";
+    const changed = await playPageTransition(() => {
+      resetGame();
+      game.enemies.length = 0;
+      game.gems.length = 0;
+      game.chests.length = 0;
+      game.blooms.push({ x: game.player.x, y: game.player.y, r: 12, max: 112, life: 0.54, color: palette.gold, kind: "bossReward", bossKind });
+      game.testChallenge = {
+        active: true,
+        bossKind,
+        bossTier,
+        draftRemaining: prepChoices,
+        draftTotal: prepChoices,
+        spawned: false,
+      };
+      game.nextBossKills = 999999;
+      game.bossesDefeated = Math.max(0, bossTier - 1);
+      game.wave = Math.max(1, bossTier);
+      game.time = Math.max(0, (bossTier - 1) * 30);
+      state = "playing";
+      pauseReturnState = "playing";
+      codexReturnState = null;
+      ui.start.classList.remove("visible");
+      ui.gameOver.classList.remove("visible");
+      ui.upgrade.classList.remove("visible");
+      ui.chest.classList.remove("visible", "revealed");
+      ui.pause.classList.remove("visible");
+      if (!prepChoices) startBossChallengeEncounter();
+      updateHud();
+      draw();
+    });
+    if (!changed) return false;
+    last = performance.now();
+    if (showTestDraftUpgrade()) return true;
+    requestAnimationFrame(loop);
+    return true;
+  }
+
+  function showTestDraftUpgrade() {
+    const challenge = game.testChallenge;
+    if (!challenge?.active || challenge.spawned || challenge.draftRemaining <= 0 || state !== "playing") return false;
+    challenge.draftRemaining -= 1;
+    showUpgrades();
+    return true;
+  }
+
+  function startBossChallengeEncounter() {
+    const challenge = game.testChallenge;
+    if (!challenge?.active || challenge.spawned) return null;
+    const p = game.player;
+    game.enemies.length = 0;
+    game.bossSpawned = true;
+    game.testBossOverride = { kind: challenge.bossKind, tier: challenge.bossTier };
+    const boss = spawnEnemy(false, false, true);
+    game.testBossOverride = null;
+    boss.x = clamp(p.x + Math.min(520, 330 + challenge.bossTier * 34), 80, world.w - 80);
+    boss.y = clamp(p.y - 24, 80, world.h - 80);
+    boss.skillTimer = Math.min(boss.skillTimer || 2, 1.4);
+    challenge.spawned = true;
+    game.blooms.push({ x: boss.x, y: boss.y, r: 20, max: 190 + challenge.bossTier * 18, life: 0.86, color: boss.color, kind: "bossSpawn", bossKind: boss.bossKind });
+    spawnParticles(boss.x, boss.y, boss.color, 36 + challenge.bossTier * 5);
+    shake = Math.max(shake, 10 + challenge.bossTier);
+    return boss;
   }
 
   function pauseRun() {
@@ -2075,10 +2186,11 @@
 
     const t = game.time;
     const hpScale = 1 + t / 85 + game.wave * 0.08;
-    const bossTier = boss ? game.bossesDefeated + 1 : 0;
+    const bossOverride = boss ? game.testBossOverride : null;
+    const bossTier = boss ? bossOverride?.tier || game.bossesDefeated + 1 : 0;
     const typeRoll = Math.random();
     const type = boss ? "boss" : elite ? "elite" : typeRoll > 0.78 ? "swift" : typeRoll > 0.55 ? "bloom" : "shade";
-    const bossKind = boss ? bossKindByTier(bossTier) : "";
+    const bossKind = boss ? bossOverride?.kind || bossKindByTier(bossTier) : "";
     const stats = {
       shade: { r: 17, hp: 20 * hpScale, speed: 76 + game.wave * 3, dmg: 11, xp: 1, color: palette.softInk },
       swift: { r: 13, hp: 14 * hpScale, speed: 122 + game.wave * 3, dmg: 8, xp: 1, color: palette.coral },
@@ -4226,6 +4338,12 @@
           draw();
         });
         if (!changed) return;
+        if (showTestDraftUpgrade()) return;
+        if (game.testChallenge?.active && !game.testChallenge.spawned) {
+          startBossChallengeEncounter();
+          updateHud();
+          draw();
+        }
         if (showQueuedUpgrade()) return;
         last = performance.now();
         requestAnimationFrame(loop);
@@ -4255,6 +4373,12 @@
   function renderUpgradePlan(pool) {
     if (!ui.upgradePlan || !game.player) return;
     const p = game.player;
+    if (game.testChallenge?.active && !game.testChallenge.spawned && game.testChallenge.draftTotal > 0) {
+      const current = game.testChallenge.draftTotal - game.testChallenge.draftRemaining;
+      const bossName = bossDisplayName({ bossTier: game.testChallenge.bossTier, bossKind: game.testChallenge.bossKind });
+      ui.upgradePlan.innerHTML = `<span><b>测试构筑</b>${current}/${game.testChallenge.draftTotal}</span><span><b>目标</b>${bossName}</span><span><b>建议</b>先选能马上看见收益的路线</span>`;
+      return;
+    }
     const archetype = getBuildArchetype(p);
     const routeCount = pool.filter((up) => getRouteOptions(up).length).length;
     const targetNames = [...new Set(pool.map((up) => upgradeBuildTarget(up)?.name || (["遗物", "能力", "超武"].includes(up.type) ? up.type : "通用补强")))].slice(0, 3);
@@ -4643,6 +4767,7 @@
   }
 
   function updateSpawning(dt) {
+    if (game.testChallenge?.active) return;
     game.spawnTimer -= dt;
     game.eliteTimer -= dt;
     const baseInterval = Math.max(0.14, 0.88 - game.time / 160);
@@ -5062,6 +5187,9 @@
   }
 
   function nextRunGoal(p) {
+    if (game.testChallenge?.active && !game.testChallenge.spawned) {
+      return `测试构筑：还可选 ${game.testChallenge.draftRemaining} 次，之后挑战 ${bossDisplayName({ bossTier: game.testChallenge.bossTier, bossKind: game.testChallenge.bossKind })}。`;
+    }
     const ready = readyEvolutionNames(p);
     if (ready.length) return `超武已备：${ready[0]}。下次升级优先拿，马上会有专属爆发。`;
     if (game.chests.length) return `场上有 ${game.chests.length} 个宝箱，去捡月匣拿 1/3/5 个奖励。`;
@@ -7065,6 +7193,27 @@
     renderCharacterSelect();
     ui.characterSelect.querySelector(`[data-character-id="${selectedCharacterId}"]`)?.focus();
   });
+  ui.bossChallengeSelect?.addEventListener("click", (event) => {
+    if (state !== "menu") return;
+    const kindButton = event.target.closest("[data-boss-kind]");
+    if (kindButton) {
+      selectedBossChallengeKind = kindButton.dataset.bossKind || selectedBossChallengeKind;
+      renderBossChallengeSelect();
+      ui.bossChallengeSelect.querySelector(`[data-boss-kind="${selectedBossChallengeKind}"]`)?.focus();
+      return;
+    }
+    const tierButton = event.target.closest("[data-boss-tier]");
+    if (tierButton) {
+      selectedBossChallengeTier = Number(tierButton.dataset.bossTier) || selectedBossChallengeTier;
+      renderBossChallengeSelect();
+      ui.bossChallengeSelect.querySelector(`[data-boss-tier="${selectedBossChallengeTier}"]`)?.focus();
+      return;
+    }
+    const startButton = event.target.closest("[data-boss-start]");
+    if (startButton) {
+      startBossChallenge(startButton.dataset.bossStart === "draft" ? 6 : 0);
+    }
+  });
   function toggleBuildPanel(panel) {
     buildPanelExpanded[panel.id] = !buildPanelExpanded[panel.id];
     renderBuildPanels();
@@ -7120,6 +7269,14 @@
       resetGame();
       return true;
     },
+    selectBossChallenge(kind, tier = selectedBossChallengeTier) {
+      if (!bossChallengeKinds.some((boss) => boss.kind === kind) || state !== "menu") return false;
+      selectedBossChallengeKind = kind;
+      selectedBossChallengeTier = clamp(Number(tier) || selectedBossChallengeTier, 1, 6);
+      renderBossChallengeSelect();
+      return true;
+    },
+    startBossChallenge,
     gainXp,
     showUpgrades() {
       if (ui.chest.classList.contains("visible")) {

@@ -741,6 +741,15 @@ body[data-game-state="menu"] .route-toast {
   width: min(940px, 100%);
 }
 
+#startOverlay {
+  align-items: start;
+  overflow-y: auto;
+}
+
+#startOverlay .title-lockup {
+  padding-block: 18px;
+}
+
 .title-lockup h1,
 .title-lockup h2,
 .upgrade-panel h2 {
@@ -910,6 +919,138 @@ body[data-game-state="menu"] .route-toast {
   background: rgba(255, 249, 237, 0.58);
   font-size: 10px;
   font-weight: 900;
+}
+
+.boss-test-panel {
+  width: min(880px, calc(100vw - 48px));
+  margin: -4px auto 16px;
+  padding: 12px;
+  border: 1px solid rgba(31, 38, 48, 0.12);
+  border-left: 6px solid var(--ink);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 249, 237, 0.86), rgba(247, 241, 231, 0.72)),
+    radial-gradient(circle at 18% 18%, rgba(143, 123, 181, 0.14), transparent 36%),
+    radial-gradient(circle at 86% 88%, rgba(201, 154, 46, 0.16), transparent 38%);
+  box-shadow: 0 16px 42px rgba(31, 38, 48, 0.1);
+  text-align: left;
+}
+
+.boss-test-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.boss-test-header span {
+  color: var(--teal);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.boss-test-header b {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.boss-test-bosses {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.boss-test-chip {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  min-height: 74px;
+  padding: 9px;
+  border: 1px solid rgba(31, 38, 48, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 249, 237, 0.62);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: none;
+}
+
+.boss-test-chip[data-selected="true"] {
+  border-color: rgba(201, 154, 46, 0.62);
+  background:
+    linear-gradient(135deg, rgba(201, 154, 46, 0.16), rgba(255, 249, 237, 0.78)),
+    rgba(255, 249, 237, 0.72);
+  box-shadow:
+    0 0 0 2px rgba(201, 154, 46, 0.18),
+    0 12px 28px rgba(31, 38, 48, 0.1);
+}
+
+.boss-test-chip .mini-glyph {
+  grid-row: span 2;
+  width: 24px;
+  height: 24px;
+}
+
+.boss-test-chip b {
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.boss-test-chip small {
+  margin-top: 3px;
+  color: #565a5f;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.boss-test-tiers {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.boss-test-tiers button {
+  min-height: 32px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(31, 38, 48, 0.78);
+  font-size: 11px;
+}
+
+.boss-test-tiers button[data-selected="true"] {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+.boss-test-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.boss-test-actions button {
+  min-height: 40px;
+  padding: 10px 12px;
+}
+
+.boss-test-actions button:first-child {
+  background: var(--coral);
+}
+
+.boss-test-actions button:last-child {
+  background: var(--teal);
+}
+
+.boss-test-panel p {
+  margin: 8px 0 0;
+  color: #565a5f;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .eyebrow {
@@ -2193,6 +2334,25 @@ body[data-game-state="menu"] .route-toast {
     12px 0 0 var(--teal);
 }
 
+.codex-glyph[data-glyph*="boss"]::before {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 249, 237, 0.86) 0 18%, transparent 20%),
+    conic-gradient(from 90deg, var(--coral), var(--lilac), var(--gold), var(--coral));
+}
+
+.codex-glyph[data-glyph*="boss"]::after {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 249, 237, 0.88);
+  border-radius: 3px;
+  background: transparent;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
 .codex-glyph[data-glyph*="evolve"] {
   box-shadow:
     inset 0 0 0 1px rgba(31, 38, 48, 0.1),
@@ -2416,6 +2576,26 @@ body[data-game-state="menu"] .route-toast {
   box-shadow:
     -7px 0 0 var(--lilac),
     7px 0 0 var(--teal);
+}
+
+.mini-glyph[data-glyph*="boss"]::before {
+  width: 17px;
+  height: 17px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 249, 237, 0.86) 0 18%, transparent 20%),
+    conic-gradient(from 90deg, var(--coral), var(--lilac), var(--gold), var(--coral));
+  transform: translate(-50%, -50%);
+}
+
+.mini-glyph[data-glyph*="boss"]::after {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 249, 237, 0.88);
+  border-radius: 2px;
+  background: transparent;
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .mini-glyph[data-glyph*="heart"]::before,
@@ -3102,6 +3282,24 @@ body[data-game-state="menu"] .route-toast {
     width: min(100%, calc(100vw - 24px));
     gap: 8px;
     margin-bottom: 14px;
+  }
+
+  .boss-test-panel {
+    width: min(100%, calc(100vw - 24px));
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+
+  .boss-test-bosses {
+    grid-template-columns: 1fr;
+  }
+
+  .boss-test-chip {
+    min-height: 58px;
+  }
+
+  .boss-test-tiers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .character-card {

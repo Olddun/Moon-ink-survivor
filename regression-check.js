@@ -45,6 +45,70 @@ async function main() {
       selected: document.querySelector(".character-card[data-selected='true']")?.dataset.characterId || "",
       startText: document.querySelector("#startButton").textContent,
     }));
+    await page.click('[data-boss-kind="storm"]');
+    await page.click('[data-boss-tier="3"]');
+    const bossTestMenu = await page.evaluate(() => ({
+      panel: !!document.querySelector("#bossChallengeSelect"),
+      bosses: document.querySelectorAll("[data-boss-kind]").length,
+      tiers: document.querySelectorAll("[data-boss-tier]").length,
+      selectedBoss: document.querySelector("[data-boss-kind][data-selected='true']")?.dataset.bossKind || "",
+      selectedTier: document.querySelector("[data-boss-tier][data-selected='true']")?.dataset.bossTier || "",
+      actions: [...document.querySelectorAll("[data-boss-start]")].map((button) => button.textContent.trim()).join("|"),
+    }));
+    await page.click("#bossDraftButton");
+    await page.waitForTimeout(1120);
+    const draftChoiceCounts = [];
+    const draftPlans = [];
+    for (let i = 0; i < 6; i += 1) {
+      await page.waitForFunction(() => document.querySelector("#upgradeOverlay").classList.contains("visible"), null, { timeout: 5000 });
+      draftChoiceCounts.push(await page.locator(".choice").count());
+      draftPlans.push(await page.locator("#upgradePlan").textContent());
+      await page.locator(".choice").first().click();
+      await page.waitForTimeout(1120);
+    }
+    await page.waitForFunction(() => window.__moonSurvivorDebug.state === "playing", null, { timeout: 5000 });
+    const bossDraftChallenge = await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      const bosses = debug.game.enemies.filter((enemy) => enemy.type === "boss");
+      return {
+        state: debug.state,
+        startHidden: !document.querySelector("#startOverlay").classList.contains("visible"),
+        upgradeHidden: !document.querySelector("#upgradeOverlay").classList.contains("visible"),
+        challenge: debug.game.testChallenge,
+        bossCount: bosses.length,
+        bossKind: bosses[0]?.bossKind || "",
+        bossTier: bosses[0]?.bossTier || 0,
+        picks: debug.game.picks.length,
+        nonBossEnemies: debug.game.enemies.filter((enemy) => enemy.type !== "boss").length,
+        subtitle: document.querySelector("#runSubtitle").textContent,
+        goal: document.querySelector("#runGoal").textContent,
+      };
+    });
+    await page.evaluate(() => window.__moonSurvivorDebug.pauseRun());
+    await page.evaluate(() => window.__moonSurvivorDebug.returnToMainMenu());
+    await page.waitForTimeout(1120);
+    await page.click('[data-boss-kind="beam"]');
+    await page.click('[data-boss-tier="2"]');
+    await page.click("#bossDirectButton");
+    await page.waitForTimeout(1120);
+    const bossDirectChallenge = await page.evaluate(() => {
+      const debug = window.__moonSurvivorDebug;
+      const bosses = debug.game.enemies.filter((enemy) => enemy.type === "boss");
+      return {
+        state: debug.state,
+        challenge: debug.game.testChallenge,
+        bossCount: bosses.length,
+        bossKind: bosses[0]?.bossKind || "",
+        bossTier: bosses[0]?.bossTier || 0,
+        picks: debug.game.picks.length,
+        nonBossEnemies: debug.game.enemies.filter((enemy) => enemy.type !== "boss").length,
+      };
+    });
+    await page.evaluate(() => window.__moonSurvivorDebug.pauseRun());
+    await page.evaluate(() => window.__moonSurvivorDebug.returnToMainMenu());
+    await page.waitForTimeout(1120);
+    await page.click('[data-character-id="lantern-child"]');
+    await page.waitForTimeout(80);
     await page.click("#startButton");
     await page.waitForTimeout(140);
     const startTransition = await page.locator("#pageTransition.visible.run").count();
@@ -2526,7 +2590,7 @@ async function main() {
     }));
     await page.close();
 
-    return { loaded, characterSelect, characterStarts, characterChosen, startTransition, started, pauseOpened, pauseResumed, escPauseOpened, escPauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, bossEncounter, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
+    return { loaded, characterSelect, characterStarts, characterChosen, bossTestMenu, bossDraftChallenge, bossDirectChallenge, draftChoiceCounts, draftPlans, startTransition, started, pauseOpened, pauseResumed, escPauseOpened, escPauseResumed, pauseRestarted, pauseMainMenu, pauseMenuRestarted, pauseDuringUpgrade, resumeToUpgrade, codexPauseStart, codexPauseHeld, codexPauseClosed, pauseDuringChest, resumeToChest, buildPanelsInitial, buildPanelsExpanded, characterTraitFx, routeFeedbackFx, bossEncounter, upgraded, sawAbility, sawRelic, choiceStyle, routeToast, routeMemory, sawSuper, superChoiceFrame, synergy, superWeapon, chestOpening, chestRevealed, chestClosed, chestResonance, lacquerKey, craneVow, focusLensEffect, codexOpen, codexTree, codexClosed, after, healthMeter, brushSplinterOption, brushSplinterEffect, brushRainOption, brushRainEffect, branchOption, branchEffect, orbShatterOption, orbShatterEffect, cinderOption, cinderEffect, flameTideOption, flameTideEffect, craneEchoOption, craneEchoEffect, lanternVeinOption, lanternVeinEffect, sigilCurtainOption, sigilCurtainEffect, jadeChainOption, jadeChainEffect, jadeWardOption, jadeWardEffect, needleOption, needleEffect, fanOption, fanEffect, fanBranchOption, fanBranchEffect, fanFeatherOption, fanFeatherEffect, fanSuperOption, fanSuperActivation, fanSuperEffect, umbrellaOption, umbrellaEffect, umbrellaLotusOption, umbrellaLotusEffect, umbrellaEchoOption, umbrellaEchoEffect, needleBranchOption, needleBranchEffect, frostEchoOption, frostEchoEffect, frostLatticeOption, frostLatticeEffect, frostSuperOption, frostSuperActivation, frostSuperEffect, rainSuperOption, rainSuperActivation, rainSuperEffect, branchInkstoneOption, branchInkstoneEffect, routeCharmOption, routeCharmEffect, tempoBellOption, tempoBellEffect, chestPrismOption, chestPrismEffect, death };
   }
 
   async function mobileRun() {
@@ -2577,6 +2641,38 @@ async function main() {
     desktop.characterStarts.every((item) => item.trait && item.traitText.includes(item.trait)) &&
     desktop.characterChosen.selected === "lantern-child" &&
     desktop.characterChosen.startText.includes("流萤拾露") &&
+    desktop.bossTestMenu.panel &&
+    desktop.bossTestMenu.bosses === 3 &&
+    desktop.bossTestMenu.tiers === 6 &&
+    desktop.bossTestMenu.selectedBoss === "storm" &&
+    desktop.bossTestMenu.selectedTier === "3" &&
+    desktop.bossTestMenu.actions.includes("直接挑战") &&
+    desktop.bossTestMenu.actions.includes("先选 6 次技能") &&
+    desktop.draftChoiceCounts.length === 6 &&
+    desktop.draftChoiceCounts.every((count) => count >= 1) &&
+    desktop.draftPlans.every((text) => text.includes("测试构筑")) &&
+    desktop.bossDraftChallenge.state === "playing" &&
+    desktop.bossDraftChallenge.startHidden &&
+    desktop.bossDraftChallenge.upgradeHidden &&
+    desktop.bossDraftChallenge.challenge?.active &&
+    desktop.bossDraftChallenge.challenge?.spawned &&
+    desktop.bossDraftChallenge.challenge?.draftTotal === 6 &&
+    desktop.bossDraftChallenge.challenge?.draftRemaining === 0 &&
+    desktop.bossDraftChallenge.bossCount === 1 &&
+    desktop.bossDraftChallenge.bossKind === "storm" &&
+    desktop.bossDraftChallenge.bossTier === 3 &&
+    desktop.bossDraftChallenge.nonBossEnemies === 0 &&
+    desktop.bossDraftChallenge.subtitle.includes("Boss") &&
+    desktop.bossDraftChallenge.goal.includes("奖励") &&
+    desktop.bossDirectChallenge.state === "playing" &&
+    desktop.bossDirectChallenge.challenge?.active &&
+    desktop.bossDirectChallenge.challenge?.spawned &&
+    desktop.bossDirectChallenge.challenge?.draftTotal === 0 &&
+    desktop.bossDirectChallenge.bossCount === 1 &&
+    desktop.bossDirectChallenge.bossKind === "beam" &&
+    desktop.bossDirectChallenge.bossTier === 2 &&
+    desktop.bossDirectChallenge.picks === 0 &&
+    desktop.bossDirectChallenge.nonBossEnemies === 0 &&
     desktop.startTransition > 0 &&
     desktop.started &&
     desktop.pauseOpened.visible &&
@@ -3180,6 +3276,7 @@ async function main() {
     if (!condition) failed.push(name);
   };
   note("chest", desktop.chestOpening.visible && !desktop.chestOpening.revealed && desktop.chestRevealed.visible && desktop.chestRevealed.revealed && [1, 3, 5].includes(desktop.chestRevealed.rewards) && desktop.chestRevealed.rewardFrames.length === desktop.chestRevealed.rewards && desktop.chestRevealed.rewardFrames.every((frame) => frame.borderWidth >= 5 && frame.borderColor !== "rgba(0, 0, 0, 0)" && frame.hasInner && frame.innerBorder !== "rgba(0, 0, 0, 0)") && new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.borderColor)).size >= Math.min(new Set(desktop.chestRevealed.rewardFrames.map((frame) => frame.type)).size, 2) && !desktop.chestClosed.visible);
+  note("boss test mode", desktop.bossTestMenu.panel && desktop.bossTestMenu.bosses === 3 && desktop.bossTestMenu.tiers === 6 && desktop.bossTestMenu.selectedBoss === "storm" && desktop.bossTestMenu.selectedTier === "3" && desktop.draftChoiceCounts.length === 6 && desktop.draftChoiceCounts.every((count) => count >= 1) && desktop.draftPlans.every((text) => text.includes("测试构筑")) && desktop.bossDraftChallenge.challenge?.draftTotal === 6 && desktop.bossDraftChallenge.challenge?.draftRemaining === 0 && desktop.bossDraftChallenge.bossCount === 1 && desktop.bossDraftChallenge.bossKind === "storm" && desktop.bossDraftChallenge.bossTier === 3 && desktop.bossDraftChallenge.nonBossEnemies === 0 && desktop.bossDirectChallenge.challenge?.draftTotal === 0 && desktop.bossDirectChallenge.bossCount === 1 && desktop.bossDirectChallenge.bossKind === "beam" && desktop.bossDirectChallenge.bossTier === 2 && desktop.bossDirectChallenge.picks === 0 && desktop.bossDirectChallenge.nonBossEnemies === 0);
   note("pause freeze states", desktop.pauseDuringUpgrade.paused && desktop.resumeToUpgrade.state === "upgrade" && desktop.codexPauseHeld.time === desktop.codexPauseStart.time && desktop.codexPauseClosed.state === "playing" && desktop.pauseDuringChest.paused && desktop.pauseDuringChest.timerStopped && desktop.resumeToChest.state === "chest" && desktop.resumeToChest.timerResumed);
   note("route feedback", desktop.routeFeedbackFx.exposed && desktop.routeFeedbackFx.triggered && desktop.routeFeedbackFx.routeBloom && desktop.routeFeedbackFx.beams >= 6 && desktop.routeFeedbackFx.trail && desktop.routeFeedbackFx.particles >= 8 && desktop.routeFeedbackFx.damaged && desktop.routeFeedbackFx.slowed && desktop.routeFeedbackFx.dewCharged);
   note("boss encounter", desktop.bossEncounter.killTriggered && desktop.bossEncounter.firstSpawned && desktop.bossEncounter.firstTier === 1 && desktop.bossEncounter.firstSkillVisible && desktop.bossEncounter.firstSkillThreat && desktop.bossEncounter.bossDefeated && desktop.bossEncounter.firstBossChestReward === 3 && desktop.bossEncounter.firstRewardBurst && desktop.bossEncounter.nextTargetAdvanced && desktop.bossEncounter.secondSpawned && desktop.bossEncounter.secondTier === 2 && desktop.bossEncounter.secondKind !== desktop.bossEncounter.firstKind && desktop.bossEncounter.secondSkillVisible && desktop.bossEncounter.secondStronger && desktop.bossEncounter.secondBossChestReward === 5 && desktop.bossEncounter.secondRewardBurst && desktop.bossEncounter.activeName.includes("首领"));
